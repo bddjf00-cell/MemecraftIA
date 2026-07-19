@@ -21,8 +21,8 @@
     "files": [
       "main.js",
       "preload.js",
-      "../index.html",
-      "../Imagenes/**/*"
+      "index.html",
+      "Imagenes/**/*"
     ],
     "win": {
       "target": [

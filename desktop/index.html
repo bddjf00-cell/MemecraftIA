@@ -322,6 +322,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
       <button onclick="toggleChatSearch()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:0 4px" title="Buscar en chat (Ctrl+F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
       <span id="modelBadge">DeepSeek V4 Flash</span>
       <button onclick="abrirApiKey()" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:4px;cursor:pointer;font-size:9px;padding:2px 6px" title="Configurar API key">API Key</button>
+      <span id="updateStatus" style="font-size:10px;color:var(--text2);display:none"></span>
       <div class="status"><div class="status-dot" id="statusDot"></div><span id="statusText">Conectado</span></div>
     </div>
   </div>
@@ -1410,5 +1411,17 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)document.t
     </div>
   </div>
 </div>
+<script>
+if(window.electronAPI){
+  const upEl=document.getElementById('updateStatus');
+  window.electronAPI.onUpdateStatus((msg)=>{
+    upEl.style.display='';
+    upEl.textContent=msg;
+    if(msg==='Versión actualizada'||msg.includes('Error')){
+      setTimeout(()=>{upEl.style.display='none'},5000);
+    }
+  });
+}
+</script>
 </body>
 </html>
