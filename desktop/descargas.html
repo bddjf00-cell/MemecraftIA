@@ -222,6 +222,119 @@ footer a{color:#00aaff;text-decoration:none}
   </div>
 </section>
 
+<!-- AI CAPABILITIES -->
+<div class="container" style="margin-bottom:60px">
+  <h2 class="section-title">Lo que la IA puede hacer</h2>
+  <p class="section-sub">Reversing, debugging, memoria, codigo y mucho mas</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <!-- AOB ANALYSIS -->
+    <div style="background:#111318;border:1px solid #1e2030;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;background:#0d0e12;border-bottom:1px solid #1e2030;font-size:11px;color:#5c5f73;font-weight:600">🔍 Analisis de patrones AOB</div>
+      <div style="padding:16px">
+        <div style="background:#0d0e12;border:1px solid #1e2030;border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;line-height:1.6;margin-bottom:12px;color:#00c864">
+<span style="color:#8b8fa3">// Patron AOB encontrado en memory.dump</span><br>
+48 8B 05 <span style="color:#ffb400">?? ?? ?? ??</span> 48 85 C0 74 0A<br>
+48 8B 40 10 48 85 C0 74 03<br>
+FF 60 48 CC 90 90 90
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="background:rgba(0,170,255,.08);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00aaff;flex-shrink:0">IA</div>
+          <div style="font-size:11px;color:#8b8fa3;line-height:1.5">El patron <code style="background:#0d0e12;padding:1px 4px;border-radius:3px;font-size:10px;color:#e8eaed">48 8B 05 ?? ?? ?? ??</code> es un <strong style="color:#e8eaed">mov rax, [rip+offset]</strong> tipico de acceso a variable global en x64. Los bytes <code style="background:#0d0e12;padding:1px 4px;border-radius:3px;font-size:10px">48 85 C0 74 0A</code> son un <strong style="color:#e8eaed">test rax, rax / je</strong> que verifica si el puntero es nulo. Esto suele ser una estructura global como <code style="background:#0d0e12;padding:1px 4px;border-radius:3px;font-size:10px">g_pGameManager</code> o similar.</div>
+        </div>
+      </div>
+    </div>
+    <!-- MEMORY HACK -->
+    <div style="background:#111318;border:1px solid #1e2030;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;background:#0d0e12;border-bottom:1px solid #1e2030;font-size:11px;color:#5c5f73;font-weight:600">🧠 Modificacion de memoria</div>
+      <div style="padding:16px">
+        <div style="background:#0d0e12;border:1px solid #1e2030;border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;line-height:1.5;margin-bottom:12px">
+<span style="color:#8b8fa3">// C++ - WriteProcessMemory example</span><br>
+<span style="color:#7c3aed">DWORD</span> pid = GetProcessIdByName(<span style="color:#00c864">"game.exe"</span>);<br>
+<span style="color:#7c3aed">HANDLE</span> hProc = OpenProcess(PROCESS_ALL_ACCESS, <span style="color:#7c3aed">FALSE</span>, pid);<br>
+<span style="color:#7c3aed">int</span> newHP = <span style="color:#ffb400">99999</span>;<br>
+WriteProcessMemory(hProc, addr, &newHP, <span style="color:#7c3aed">sizeof</span>(newHP), &written);
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="background:rgba(0,170,255,.08);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00aaff;flex-shrink:0">IA</div>
+          <div style="font-size:11px;color:#8b8fa3;line-height:1.5">Codigo completo para modificar memoria de un proceso. Incluye <strong style="color:#e8eaed">GetProcessIdByName</strong>, <strong style="color:#e8eaed">OpenProcess</strong> con permisos totales y <strong style="color:#e8eaed">WriteProcessMemory</strong>. El codigo busca el proceso por nombre, obtiene su PID, abre un handle y escribe el nuevo valor en la direccion especificada.</div>
+        </div>
+      </div>
+    </div>
+    <!-- DLL INJECTION -->
+    <div style="background:#111318;border:1px solid #1e2030;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;background:#0d0e12;border-bottom:1px solid #1e2030;font-size:11px;color:#5c5f73;font-weight:600">💉 Inyeccion DLL</div>
+      <div style="padding:16px">
+        <div style="background:#0d0e12;border:1px solid #1e2030;border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;line-height:1.5;margin-bottom:12px">
+<span style="color:#8b8fa3">// C++ - DLL Injection via CreateRemoteThread</span><br>
+LPVOID remoteMem = VirtualAllocEx(hProc, <span style="color:#7c3aed">NULL</span>, dllPath.Size(), MEM_COMMIT, PAGE_READWRITE);<br>
+WriteProcessMemory(hProc, remoteMem, dllPath, dllPath.Size(), &written);<br>
+LPVOID loadLib = GetProcAddress(GetModuleHandle(<span style="color:#00c864">"kernel32.dll"</span>), <span style="color:#00c864">"LoadLibraryA"</span>);<br>
+CreateRemoteThread(hProc, <span style="color:#7c3aed">NULL</span>, <span style="color:#ffb400">0</span>, loadLib, remoteMem, <span style="color:#ffb400">0</span>, <span style="color:#7c3aed">NULL</span>);
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="background:rgba(0,170,255,.08);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00aaff;flex-shrink:0">IA</div>
+          <div style="font-size:11px;color:#8b8fa3;line-height:1.5">Inyeccion DLL clasica via <strong style="color:#e8eaed">CreateRemoteThread</strong>. Reserva memoria en el proceso remoto, escribe la ruta de la DLL, obtiene la direccion de <strong style="color:#e8eaed">LoadLibraryA</strong> y crea un hilo remoto que la carga. Incluye manejo de errores y espera de hilo.</div>
+        </div>
+      </div>
+    </div>
+    <!-- CODE GENERATION -->
+    <div style="background:#111318;border:1px solid #1e2030;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;background:#0d0e12;border-bottom:1px solid #1e2030;font-size:11px;color:#5c5f73;font-weight:600">⚡ Generacion de codigo completo</div>
+      <div style="padding:16px">
+        <div style="background:#0d0e12;border:1px solid #1e2030;border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;line-height:1.5;margin-bottom:12px">
+<span style="color:#8b8fa3"># Python - Memory scanner with pattern matching</span><br>
+<span style="color:#7c3aed">def</span> <span style="color:#ffb400">scan_pattern</span>(pid, pattern):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;regions = get_memory_regions(pid)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed">for</span> base, size <span style="color:#7c3aed">in</span> regions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data = read_process_memory(pid, base, size)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;results = aob_scan(data, pattern)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed">if</span> results: <span style="color:#7c3aed">return</span> [(base + off) <span style="color:#7c3aed">for</span> off <span style="color:#7c3aed">in</span> results]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed">return</span> []
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="background:rgba(0,170,255,.08);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00aaff;flex-shrink:0">IA</div>
+          <div style="font-size:11px;color:#8b8fa3;line-height:1.5">Genera codigo COMPLETO en C++, C#, Python, Rust, Go y mas. Sin "...", sin "resto del codigo". Cada respuesta incluye <strong style="color:#e8eaed">analisis detallado</strong> explicando como funciona cada parte del codigo generado.</div>
+        </div>
+      </div>
+    </div>
+    <!-- ESP GLOW -->
+    <div style="background:#111318;border:1px solid #1e2030;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;background:#0d0e12;border-bottom:1px solid #1e2030;font-size:11px;color:#5c5f73;font-weight:600">🎨 Colores ESP y efectos visuales</div>
+      <div style="padding:16px">
+        <div style="background:#0d0e12;border:1px solid #1e2030;border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;line-height:1.5;margin-bottom:12px">
+<span style="color:#8b8fa3">// C++ - ESP Box via D3D9/11 overlay</span><br>
+<span style="color:#7c3aed">void</span> DrawESPBox(Vector2 head, Vector2 feet, <span style="color:#7c3aed">D3DCOLOR</span> color) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed">float</span> h = feet.y - head.y;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed">float</span> w = h * <span style="color:#ffb400">0.5f</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;DrawBorderBox(head.x - w/<span style="color:#ffb400">2</span>, head.y, w, h, <span style="color:#ffb400">2.0f</span>, color);<br>
+}
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="background:rgba(0,170,255,.08);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00aaff;flex-shrink:0">IA</div>
+          <div style="font-size:11px;color:#8b8fa3;line-height:1.5">Codigo completo para ESP boxes, glow effects, trazos y overlays via <strong style="color:#e8eaed">DirectX 9/11</strong> o <strong style="color:#e8eaed">OpenGL</strong>. Incluye WorldToScreen, calculo de cabezas/pies, y color personalizado por equipo.</div>
+        </div>
+      </div>
+    </div>
+    <!-- DEBUGGING -->
+    <div style="background:#111318;border:1px solid #1e2030;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px;background:#0d0e12;border-bottom:1px solid #1e2030;font-size:11px;color:#5c5f73;font-weight:600">🐛 Debugging y analisis de crashes</div>
+      <div style="padding:16px">
+        <div style="background:#0d0e12;border:1px solid #1e2030;border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;line-height:1.5;margin-bottom:12px">
+<span style="color:#8b8fa3">// Crash dump analysis - EXCEPTION_ACCESS_VIOLATION</span><br>
+<span style="color:#8b8fa3">// EIP: 0x0045A2F1 | mov ecx, [eax+0x1C]</span><br>
+<span style="color:#8b8fa3">// EAX: 0x00000000 ← NULL pointer dereference!</span><br><br>
+<span style="color:#7c3aed">if</span> (player && player->GetHealth() > <span style="color:#ffb400">0</span>) {  <span style="color:#5c5f73">// &lt;- Fix: null check</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;player->Update();
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="background:rgba(0,170,255,.08);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00aaff;flex-shrink:0">IA</div>
+          <div style="font-size:11px;color:#8b8fa3;line-height:1.5">Analisis de crash dumps, excepciones, stack traces y errores de memoria. Identifica <strong style="color:#e8eaed">null pointers</strong>, <strong style="color:#e8eaed">buffer overflows</strong>, <strong style="color:#e8eaed">use-after-free</strong> y propone fixes con codigo completo.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- STATS -->
 <div class="container" style="margin-bottom:60px">
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center">
