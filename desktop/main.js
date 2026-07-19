@@ -124,7 +124,8 @@ ipcMain.handle('api-request',async(_e,url,options,body)=>{
       hostname:u.hostname,port:443,path:u.pathname+u.search,
       method:options.method||'POST',
       headers:options.headers||{'Content-Type':'application/json'},
-      rejectUnauthorized:false
+      rejectUnauthorized:false,
+      timeout:180000
     };
     const req=https.request(opt,(res)=>{
       let data='';
@@ -140,6 +141,7 @@ ipcMain.handle('api-request',async(_e,url,options,body)=>{
       });
     });
     req.on('error',e=>reject(new Error(e.message)));
+    req.on('timeout',()=>{req.destroy();reject(new Error('Tiempo de espera agotado'))});
     if(body)req.write(body);
     req.end();
   });

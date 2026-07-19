@@ -123,6 +123,14 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
 .input-expand{display:none;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow-y:auto;max-height:180px;margin-bottom:6px}
 .input-expand.open{display:block}
 .input-expand pre{margin:0;padding:8px 10px;font-family:Consolas,monospace;font-size:11px;color:var(--text2);white-space:pre-wrap}
+.file-preview-area{display:none;gap:4px;padding:2px 0;flex-wrap:wrap;min-height:0;margin-bottom:4px}
+.file-preview-area.open{display:flex}
+.file-preview-item{display:flex;align-items:center;gap:6px;padding:3px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text);flex-shrink:0}
+.file-preview-item .ext-badge{font-size:7px;font-weight:600;text-transform:uppercase;background:var(--bg3);color:var(--text2);padding:0 4px;border-radius:3px;line-height:18px;min-width:20px;text-align:center;flex-shrink:0}
+.file-preview-item .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;flex-shrink:1;min-width:0}
+.file-preview-item .fsize{font-size:9px;color:var(--text2);flex-shrink:0}
+.file-preview-item .fremove{background:none;border:none;color:var(--text2);cursor:pointer;font-size:10px;padding:0 2px;line-height:1;flex-shrink:0}
+.file-preview-item .fremove:hover{color:var(--red)}
 .img-preview-area{display:flex;gap:6px;padding:4px 0;flex-wrap:wrap;min-height:0}
 .img-preview-item{position:relative;width:56px;height:56px;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
 .img-preview-item img{width:100%;height:100%;object-fit:cover}
@@ -447,6 +455,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,
   <div class="input-area">
     <div class="input-area-inner">
     <div class="input-expand" id="inputExpand"><pre id="inputPreview"></pre></div>
+    <div class="file-preview-area" id="filePreviewArea"></div>
     <div class="img-preview-area" id="imgPreviewArea"></div>
     <div class="char-count" id="charCount"></div>
     <div class="input-row">
@@ -488,7 +497,7 @@ const MODELS_API = {
   'glm-5.2':{model:'z-ai/glm-5.2',apiKey:'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',temperature:1,top_p:1,max_tokens:65536,supportsThinking:true},
   'kimi-k2.6':{model:'moonshotai/kimi-k2.6',apiKey:'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',temperature:1,top_p:1,max_tokens:65536}
 };
-let archivos=[], archivoActual=null, historial=[];
+let archivos=[], archivoActual=null, historial=[], archivosAdjuntos=[];
 let modeloActual = localStorage.getItem('memecraft_model') || 'llama-3.1-8b';
 let modoActual = localStorage.getItem('memecraft_modo') || 'programmer';
 let profundidadActual = localStorage.getItem('memecraft_depth') || 'veloz';
@@ -755,16 +764,20 @@ function esc(t){const d=document.createElement('div');d.textContent=t;return d.i
 
 function str(v){return typeof v==='string'?v:typeof v=== 'object'&&v!==null?JSON.stringify(v,null,2):String(v)}
 
-function msgMultimodal(texto, imagenes=[], tipo='user'){
+function msgMultimodal(texto, imagenes=[], tipo='user', archivos=[]){
   const m=document.getElementById('msgs');
   const d=document.createElement('div');d.className='msg '+tipo;
   const time=new Date();const ts=time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
   const actions=`<div class="msg-actions">${tipo==='user'?`<button onclick="editarMensaje(this)">Editar</button><button onclick="borrarMensaje(this)">Borrar</button>`:''}</div>`;
+  let extraHtml='';
+  if(archivos.length){
+    extraHtml='<div style="display:flex;gap:4px;flex-wrap:wrap;margin:2px 0 6px">'+archivos.map(a=>`<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-size:10px">${a.name.split('/').pop()}</span>`).join('')+'</div>';
+  }
   let imgHtml='';
   if(imagenes.length){
     imgHtml='<div class="msg-img">'+imagenes.map(img=>`<img src="${img.dataUrl}" alt="${img.name}" title="${img.name}">`).join('')+'</div>';
   }
-  d.innerHTML=actions+imgHtml+(texto?renderMsg(texto):'')+`<div class="msg-time">${ts}</div>`;
+  d.innerHTML=actions+extraHtml+imgHtml+(texto?renderMsg(texto):'')+`<div class="msg-time">${ts}</div>`;
   m.appendChild(d);
   if(!scrollLock)m.scrollIntoView({behavior:'smooth',block:'end'});
   return d;
@@ -930,8 +943,11 @@ async function enviar() {
     imagenesAdjuntas=[];renderPreviews();
     return;
   }
+  const archivosParaEnviar=archivosAdjuntos.slice();
+  const imgsParaEnviar2=imagenesAdjuntas.slice();
+  archivosAdjuntos=[];renderFilePreviews();
   imagenesAdjuntas=[];renderPreviews();
-  msgMultimodal(textoEnviar,imgsParaEnviar,'user');
+  msgMultimodal(textoEnviar,imgsParaEnviar2,'user',archivosParaEnviar);
   let userContent;
   if(esMultimodal && imgsParaEnviar.length){
     userContent=[{type:'text',text:textoEnviar||'Describe esta imagen'}];
@@ -945,7 +961,7 @@ async function enviar() {
   document.getElementById('btnStop').style.display='';
   generando=true;
   controller=new AbortController();
-  timeoutId=setTimeout(()=>{if(controller){controller.abort();tiempoExcedido=true}},esMultimodal?240000:120000);
+  timeoutId=setTimeout(()=>{if(controller){controller.abort();tiempoExcedido=true}},esMultimodal?60000:30000);
   tiempoInicio=Date.now();
   scrollLock=false;
   document.getElementById('scrollLockIndicator').classList.remove('show');
@@ -953,8 +969,14 @@ async function enviar() {
 
   try{
     let ctx='';
-    if(archivoActual)ctx=`\n\nArchivo: ${archivoActual.name}\n\`\`\`${archivoActual.ext}\n${archivoActual.content}\n\`\`\`\n`;
-    else if(archivos.length&&textoEnviar.length>5){
+    if(archivosParaEnviar.length){
+      ctx='\n\nArchivos adjuntos:\n';
+      for(const a of archivosParaEnviar){
+        ctx+=`\nArchivo: ${a.name}\n\`\`\`${a.ext}\n${a.content}\n\`\`\`\n`;
+      }
+    } else if(archivoActual){
+      ctx=`\n\nArchivo: ${archivoActual.name}\n\`\`\`${archivoActual.ext}\n${archivoActual.content}\n\`\`\`\n`;
+    } else if(archivos.length&&textoEnviar.length>5){
       const mencionado=archivos.find(a=>textoEnviar.toLowerCase().includes(a.name.split('/').pop().toLowerCase()));
       if(mencionado)ctx=`\n\nArchivo: ${mencionado.name}\n\`\`\`${mencionado.ext}\n${mencionado.content}\n\`\`\`\n`;
     }
@@ -1306,11 +1328,27 @@ async function procesarArchivos(files){
     try{
       const ext=(f.name.match(/\.(\w+)$/)||['',''])[1].toLowerCase();
       if(['png','jpg','jpeg','gif','bmp','ico','mp3','mp4','avi','mov','exe','dll','zip','rar','7z','woff','woff2','ttf','eot','pdf'].includes(ext))continue;
+      if(f.size>2*1024*1024)continue;
       const content=await f.text();
-      archivos.push({name:f.name,content,size:f.size,lines:content.split('\n').length,ext});
+      archivosAdjuntos.push({name:f.name,content,size:f.size,lines:content.split('\n').length,ext});
     }catch{}
   }
-  renderFileList();
+  renderFilePreviews();
+}
+
+function renderFilePreviews(){
+  const el=document.getElementById('filePreviewArea');
+  if(!archivosAdjuntos.length){el.classList.remove('open');return}
+  el.classList.add('open');
+  el.innerHTML=archivosAdjuntos.map((a,i)=>{
+    const size=a.size>1024?(a.size/1024).toFixed(0)+'KB':a.size+'B';
+    return `<div class="file-preview-item"><span class="ext-badge">${a.ext}</span><span class="fname">${a.name.split('/').pop()}</span><span class="fsize">${size}</span><button class="fremove" onclick="quitarArchivoAdjunto(${i})">&#10005;</button></div>`;
+  }).join('');
+}
+
+function quitarArchivoAdjunto(i){
+  archivosAdjuntos.splice(i,1);
+  renderFilePreviews();
 }
 
 function generarArbolProyecto(){
@@ -1497,6 +1535,26 @@ function limpiarApiKey(){
   document.getElementById('customApiUrl').value='';
   document.getElementById('customApiKeyStatus').textContent='Usando claves integradas';
   setTimeout(()=>document.getElementById('customApiKeyStatus').textContent='',2000);
+}
+async function probarApi(){
+  const st=document.getElementById('customApiKeyStatus');
+  const key=document.getElementById('customApiKey').value.trim()||localStorage.getItem('memecraft_apikey')||MODELS_API[modeloActual]?.apiKey||'';
+  const url=document.getElementById('customApiUrl').value.trim()||localStorage.getItem('memecraft_apiurl')||NVIDIA_API;
+  st.style.color='var(--text2)';st.textContent='Probando conexion...';
+  try{
+    const r=await fetch(url,{method:'POST',signal:AbortSignal.timeout(15000),headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:MODELS_API[modeloActual]?.model||'meta/llama-3.1-8b-instruct',messages:[{role:'user',content:'Hola'}],max_tokens:1})});
+    if(r.ok){st.style.color='var(--green)';st.textContent='Conexion exitosa. La API responde correctamente.'}
+    else{let d;try{d=await r.json()}catch{}
+      const m=d&&(typeof d.error==='string'?d.error:d.error?.message)||`Error HTTP ${r.status}`;
+      st.style.color='var(--red)';st.textContent='Error: '+m;
+    }
+  }catch(e){
+    st.style.color='var(--red)';
+    if(e.name==='TimeoutError'||e.message?.includes('timed out'))st.textContent='Tiempo de espera agotado (15s). Revisa tu conexion o URL.';
+    else if(e.message?.match(/fetch|Network|Failed|ENOTFOUND/i))st.textContent='No se pudo conectar. Revisa tu internet o la URL.';
+    else st.textContent='Error: '+e.message;
+  }
+  setTimeout(()=>{st.textContent='';st.style.color='var(--green)'},5000);
 }
 // Load saved config on startup
 (function(){
@@ -1741,6 +1799,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)document.t
       <input type="password" id="customApiKey" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px" placeholder="nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
       <div style="display:flex;gap:8px;margin-top:10px">
         <button onclick="guardarApiKey()" style="flex:1;padding:7px 12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px">Guardar</button>
+        <button onclick="probarApi()" style="padding:7px 12px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);cursor:pointer;font-size:12px">Probar</button>
         <button onclick="limpiarApiKey()" style="padding:7px 12px;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:12px">Limpiar</button>
       </div>
       <div id="customApiKeyStatus" style="font-size:11px;color:var(--green);margin-top:8px"></div>
