@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemeCraft Code</title>
+<link rel="icon" href="Imagenes/Logo.png" type="image/png">
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;--text:#c9d1d9;--text2:#8b949e;--accent:#0096c8;--accent2:#00b4d8;--green:#3fb950;--red:#f85149;--radius:6px;--sidebar-w:260px}
+html.light{--bg:#f5f5f5;--bg2:#ffffff;--bg3:#e8eaed;--border:#dadce0;--text:#202124;--text2:#5f6368;--accent:#1a73e8;--accent2:#4dabf7;--green:#34a853;--red:#ea4335}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,Segoe UI,sans-serif;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);padding:12px;display:flex;flex-direction:column;flex-shrink:0;z-index:10}
+.sidebar-logo{padding:8px 4px 16px;font-size:15px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.sidebar-logo-img{width:24px;height:24px;border-radius:4px;object-fit:contain;flex-shrink:0}
+.sidebar section{margin-bottom:14px}
+.sidebar section h3{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:6px;padding:0 4px}
+.sidebar-btn{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;margin-bottom:2px;background:transparent;border:none;color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:12px;text-align:left;transition:all .15s}
+.sidebar-btn:hover{background:var(--bg3);color:var(--text)}
+.sidebar-btn.active{background:rgba(0,150,200,.12);color:var(--accent)}
+
+/* Model cards */
+.model-grid{display:flex;flex-direction:column;gap:4px}
+.model-card{display:flex;align-items:center;gap:8px;padding:6px 8px;background:transparent;border:1px solid transparent;border-radius:var(--radius);cursor:pointer;font-size:12px;text-align:left;transition:all .15s;position:relative}
+.model-card:hover{background:var(--bg3);border-color:var(--border)}
+.model-card.active{background:rgba(0,150,200,.08);border-color:var(--accent)}
+.model-card .model-logo{width:24px;height:24px;border-radius:4px;flex-shrink:0;object-fit:contain}
+.model-card .model-info{flex:1;min-width:0}
+.model-card .model-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.2}
+.model-card .model-desc{font-size:9px;color:var(--text2);line-height:1.3;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-tag{font-size:8px;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.tag-fast{background:rgba(63,185,80,.15);color:var(--green)}
+.tag-balanced{background:rgba(0,150,200,.15);color:var(--accent)}
+.tag-power{background:rgba(188,140,255,.15);color:#bc8cff}
+.tag-think{background:rgba(210,153,34,.15);color:#d29922}
+
+.sidebar .count{font-size:10px;color:var(--text2);padding:2px 4px 6px}
+#fileList{flex:1;overflow-y:auto;margin-top:2px;font-size:11px}
+.file-item{padding:4px 6px;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:all .1s;border-left:2px solid transparent}
+.file-item:hover{background:var(--bg3);color:var(--text)}
+.file-item.active{background:rgba(0,150,200,.12);border-left-color:var(--accent);color:var(--text)}
+.ext-badge{font-size:8px;font-weight:600;text-transform:uppercase;background:var(--bg3);color:var(--text2);padding:0 4px;border-radius:3px;border:1px solid var(--border);line-height:16px;min-width:22px;text-align:center;flex-shrink:0}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* Topbar with mode pills */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:42px;border-bottom:1px solid var(--border);background:var(--bg2);font-size:12px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:8px;min-width:0}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mode-pills{display:flex;gap:2px;background:var(--bg);border-radius:16px;padding:2px;border:1px solid var(--border);flex-shrink:0}
+.mode-btn{padding:3px 12px;background:transparent;border:none;color:var(--text2);border-radius:14px;cursor:pointer;font-size:10px;font-weight:500;transition:all .15s;white-space:nowrap}
+.mode-btn:hover{color:var(--text)}
+.mode-btn.active{background:var(--accent);color:#fff}
+#proyecto{color:var(--text2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#modelBadge{padding:3px 10px;border-radius:10px;font-size:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+.chat-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;min-height:0}
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text2);padding:40px}
+.empty-chat h1{font-size:22px;font-weight:500;color:var(--text)}
+.empty-chat p{font-size:13px}
+.chat-area:has(.msg) .empty-chat{display:none}
+.msgs{padding:16px 20px;display:flex;flex-direction:column;gap:8px;margin:0 auto;width:100%;max-width:900px}
+.msg{max-width:80%;padding:10px 14px;border-radius:var(--radius);font-size:14px;line-height:1.5;word-wrap:break-word}
+.msg.user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:2px}
+.msg.ai{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:2px}
+.msg.system{background:transparent;color:var(--text2);font-size:11px;align-self:center;padding:2px 8px;text-align:center}
+.msg.error{background:rgba(248,81,73,.12);border:1px solid var(--red);color:var(--red);align-self:flex-start}.msg.system.error-msg{background:rgba(248,81,73,.12);border:1px solid var(--red);padding:8px 14px;font-size:12px;align-self:center;max-width:90%}
+.msg .model-label{font-size:10px;color:var(--text2);margin-bottom:4px;opacity:.7}
+.msg .code-block{position:relative;margin:6px 0;background:#0a0a0a;border:1px solid #222;border-radius:5px;overflow:hidden}
+.msg .code-block .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 10px;background:#111;border-bottom:1px solid #222;font-size:10px;color:var(--text2)}
+.msg .code-block .code-hdr .copy-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:4px;padding:1px 8px;cursor:pointer;font-size:10px;transition:all .15s}
+.msg .code-block .code-hdr .copy-btn:hover{background:var(--accent);color:#fff}
+.msg .code-block pre{margin:0;padding:10px;overflow-x:auto;font-family:Consolas,monospace;font-size:12px;color:var(--green)}
+.msg code{font-family:Consolas,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent2)}
+.typing-indicator{display:flex;gap:3px;padding:8px 14px;align-self:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius)}
+.typing-indicator span{width:6px;height:6px;background:var(--text2);border-radius:50%;animation:typing 1.4s infinite}
+.typing-indicator span:nth-child(2){animation-delay:.2s}
+.typing-indicator span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{opacity:.4}30%{opacity:1}}
+.msg-content.streaming::after{content:'|';animation:blink .8s step-end infinite;color:var(--accent);margin-left:1px;font-weight:700}
+@keyframes blink{50%{opacity:0}}
+.viewer-panel{display:none;border-top:1px solid var(--border);background:var(--bg2);flex-direction:column;flex-shrink:0;max-height:45vh}
+.viewer-panel.open{display:flex}
+.viewer-header{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:11px;flex-shrink:0}
+.viewer-header-left{display:flex;align-items:center;gap:8px;overflow:hidden}
+.viewer-header-left .vname{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer-header-left .vmeta{color:var(--text2)}
+.viewer-header-actions{display:flex;align-items:center;gap:4px}
+.viewer-header-actions button{padding:3px 10px;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:4px;cursor:pointer;font-size:10px;transition:all .15s;white-space:nowrap}
+.viewer-header-actions button:hover{background:var(--bg);color:var(--text)}
+.viewer-header-actions .btn-analyze{background:var(--accent);color:#fff;border-color:var(--accent)}
+.viewer-header-actions .btn-analyze:hover{background:var(--accent2)}
+.viewer-header-actions .btn-close{font-size:16px;padding:1px 6px;line-height:1}
+.viewer-body{flex:1;overflow:auto;background:#0a0a0a}
+.viewer-body pre{margin:0;padding:10px 14px;font-family:Consolas,'Courier New',monospace;font-size:12px;color:var(--green);white-space:pre;tab-size:4;line-height:1.5}
+.input-area{border-top:1px solid var(--border);padding:10px 16px;background:var(--bg2);flex-shrink:0}.input-area-inner{max-width:900px;margin:0 auto}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+.input-row textarea{flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);resize:none;font-size:13px;min-height:38px;max-height:120px;outline:none;font-family:inherit}
+.input-row textarea:focus{border-color:var(--accent)}
+.input-row button{padding:7px 18px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s}
+.input-row button:hover{background:var(--accent2)}
+.input-row button:disabled{opacity:.35;cursor:default}
+.input-row .btn-icon{padding:6px 8px;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:15px;line-height:1;transition:all .15s}
+.input-row .btn-icon:hover{background:var(--bg3);color:var(--text)}
+#btnStop{display:none;background:var(--red);color:#fff}
+#btnStop:hover{background:#d63a2f}
+.input-expand{display:none;background:var(--bg);border:1px solid var(--border);border-radius:4px;overflow-y:auto;max-height:180px;margin-bottom:6px}
+.input-expand.open{display:block}
+.input-expand pre{margin:0;padding:8px 10px;font-family:Consolas,monospace;font-size:11px;color:var(--text2);white-space:pre-wrap}
+.img-preview-area{display:flex;gap:6px;padding:4px 0;flex-wrap:wrap;min-height:0}
+.img-preview-item{position:relative;width:56px;height:56px;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
+.img-preview-item img{width:100%;height:100%;object-fit:cover}
+.img-preview-item .img-remove{position:absolute;top:-1px;right:-1px;width:16px;height:16px;background:var(--red);color:#fff;border:none;border-radius:0 4px 0 4px;cursor:pointer;font-size:9px;line-height:16px;text-align:center;padding:0}
+.msg-img{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+.msg-img img{max-width:200px;max-height:150px;border-radius:4px;border:1px solid var(--border);cursor:pointer;transition:transform .15s}
+.msg-img img:hover{transform:scale(2);z-index:10;position:relative}
+.msg.user .msg-img img{border-color:rgba(255,255,255,.2)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Funciones modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;width:90%;max-width:800px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;animation:fadeIn .15s}
+@keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg3);border-radius:10px 10px 0 0}
+.modal-header h2{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.modal-header .modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0 4px;line-height:1}
+.modal-header .modal-close:hover{color:var(--text)}
+.modal-search{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
+.modal-search input{width:100%;padding:7px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);font-size:12px;outline:none;font-family:inherit}
+.modal-search input:focus{border-color:var(--accent)}
+.modal-body{flex:1;overflow-y:auto;padding:8px 16px 16px}
+.modal-body .func-count{font-size:10px;color:var(--text2);padding:6px 0 2px}
+.modal-cat{margin-bottom:4px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.modal-cat-header{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);cursor:pointer;font-size:11px;font-weight:600;color:var(--text);user-select:none;transition:background .15s}
+.modal-cat-header:hover{background:var(--bg)}
+.modal-cat-header .arrow{font-size:8px;color:var(--text2);transition:transform .2s;margin-left:auto}
+.modal-cat-header .arrow.open{transform:rotate(90deg)}
+.modal-cat-body{display:none;padding:4px 6px;background:var(--bg2)}
+.modal-cat-body.open{display:block}
+.func-item{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:11px;color:var(--text2);transition:background .1s}
+.func-item:hover{background:var(--bg3);color:var(--text)}
+.func-item .func-name{font-weight:500;color:var(--text);margin-right:4px;white-space:nowrap}
+.func-item .func-desc{font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.func-item .func-tag{margin-left:auto;font-size:8px;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.func-tag-nuevo{background:rgba(63,185,80,.15);color:var(--green)}
+.func-tag-pro{background:rgba(188,140,255,.15);color:#bc8cff}
+.func-tag-pop{background:rgba(210,153,34,.15);color:#d29922}
+
+/* New features: timestamps, links, copy, animations, etc */
+.msg{position:relative;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg .msg-time{font-size:9px;color:var(--text2);opacity:.4;margin-top:4px;text-align:right;user-select:none}
+.msg:hover .msg-time{opacity:.8}
+.msg-actions{position:absolute;top:4px;right:4px;display:none;gap:2px;z-index:2}
+.msg:hover .msg-actions{display:flex}
+.msg-actions button{padding:2px 6px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:4px;cursor:pointer;font-size:9px;transition:all .1s}
+.msg-actions button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.msg-edit-box{width:100%}
+.msg-edit-box textarea{width:100%;padding:6px 8px;background:var(--bg);border:1px solid var(--accent);color:var(--text);border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;outline:none;min-height:60px}
+.msg-edit-actions{display:flex;gap:4px;margin-top:4px}
+.msg-edit-actions button{padding:3px 12px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:500;border:1px solid var(--border)}
+.msg-edit-save{background:var(--accent);color:#fff;border-color:var(--accent)}
+.msg-edit-cancel{background:var(--bg3);color:var(--text2)}
+.msg a{color:var(--accent2);text-decoration:underline}
+.msg a:hover{color:#fff}
+.msg strong{font-weight:600;color:var(--text)}
+.msg em{font-style:italic}
+.msg del{text-decoration:line-through;opacity:.6}
+
+/* Char counter */
+.char-count{font-size:10px;color:var(--text2);text-align:right;padding:2px 2px 0;opacity:0;transition:opacity .2s}
+.char-count.show{opacity:.6}
+
+/* Chat search bar */
+.chat-search{display:none;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.chat-search.open{display:flex;gap:6px}
+.chat-search input{flex:1;padding:5px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);font-size:12px;outline:none;font-family:inherit}
+.chat-search input:focus{border-color:var(--accent)}
+.chat-search .cs-count{font-size:10px;color:var(--text2);padding:4px 0;white-space:nowrap}
+
+/* Sidebar collapsed */
+.sidebar.collapsed{width:48px;overflow:hidden}
+.sidebar.collapsed section h3,
+.sidebar.collapsed .sidebar-logo span,
+.sidebar.collapsed .sidebar-logo-img,
+.sidebar.collapsed .sidebar-btn span,
+.sidebar.collapsed .model-card .model-info,
+.sidebar.collapsed .model-card .model-tag,
+.sidebar.collapsed .count,
+.sidebar.collapsed .file-item .ext,
+.sidebar.collapsed .file-item{display:none}
+.sidebar.collapsed .sidebar-logo{padding:8px 0 16px;justify-content:center;font-size:18px}
+.sidebar.collapsed .model-card{justify-content:center;padding:6px 0}
+.sidebar.collapsed .sidebar-btn{justify-content:center;padding:6px 0}
+.sidebar.collapsed .file-item{justify-content:center;padding:4px 0}
+.main.expanded{margin-left:0}
+
+/* Tips rotator */
+.tip-text{font-size:11px;color:var(--text2);text-align:center;padding:4px 0 0;min-height:20px;animation:tipFade .5s}
+@keyframes tipFade{from{opacity:0}to{opacity:1}}
+.tip-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:10px;padding:0 4px}
+
+/* Scroll lock indicator */
+.scroll-lock-indicator{display:none;position:sticky;bottom:0;padding:4px;text-align:center;background:var(--bg3);border-top:1px solid var(--border);font-size:9px;color:var(--text2);cursor:pointer;z-index:5}
+.scroll-lock-indicator.show{display:block}
+.scroll-lock-indicator:hover{color:var(--accent)}
+
+/* Notif flash */
+@keyframes notifPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Shortcuts modal */
+.shortcuts-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px 0}
+.shortcut-item{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:11px;border-radius:4px}
+.shortcut-item:hover{background:var(--bg3)}
+.shortcut-key{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:10px;font-family:Consolas,monospace;color:var(--accent);white-space:nowrap}
+.shortcut-desc{color:var(--text2)}
+
+@media(max-width:900px){.sidebar{position:fixed;left:calc(-1 * var(--sidebar-w));height:100%;transition:left .2s;z-index:100}.sidebar.open{left:0}.msg{max-width:95%}.mode-btn{padding:2px 8px;font-size:9px}}
+</style>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo" style="justify-content:space-between"><img src="Imagenes/Logo.png" class="sidebar-logo-img" alt="MemeCraft Code"><span>MemeCraft Code</span><button onclick="toggleSidebarColapso()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;padding:0">◀</button></div>
+  <section>
+    <h3>Modelo</h3>
+    <div class="model-grid">
+      <div class="model-card active" data-model="deepseek-v4-flash" onclick="seleccionarModelo('deepseek-v4-flash',this)">
+        <img class="model-logo" src="https://unpkg.com/@lobehub/icons-static-png@latest/light/deepseek-color.png" alt="DeepSeek" loading="lazy">
+        <div class="model-info">
+          <div class="model-name">DeepSeek V4 Flash</div>
+          <div class="model-desc">Rápido, respuestas al instante</div>
+        </div>
+        <span class="model-tag tag-fast">Flash</span>
+      </div>
+      <div class="model-card" data-model="deepseek-v4-pro" onclick="seleccionarModelo('deepseek-v4-pro',this)">
+        <img class="model-logo" src="https://unpkg.com/@lobehub/icons-static-png@latest/light/deepseek-color.png" alt="DeepSeek" loading="lazy">
+        <div class="model-info">
+          <div class="model-name">DeepSeek V4 Pro</div>
+          <div class="model-desc">Preciso, análisis profundo</div>
+        </div>
+        <span class="model-tag tag-balanced">Pro</span>
+      </div>
+      <div class="model-card" data-model="qwen-3.5-397b" onclick="seleccionarModelo('qwen-3.5-397b',this)">
+        <img class="model-logo" src="https://unpkg.com/@lobehub/icons-static-png@latest/light/qwen-color.png" alt="Qwen" loading="lazy">
+        <div class="model-info">
+          <div class="model-name">Qwen 3.5 397B</div>
+          <div class="model-desc">Máxima potencia, 397B params</div>
+        </div>
+        <span class="model-tag tag-power">Ultra</span>
+      </div>
+      <div class="model-card" data-model="nemotron-3-super" onclick="seleccionarModelo('nemotron-3-super',this)">
+        <img class="model-logo" src="https://unpkg.com/@lobehub/icons-static-png@latest/light/nvidia-color.png" alt="Nemotron" loading="lazy">
+        <div class="model-info">
+          <div class="model-name">Nemotron 3 Super</div>
+          <div class="model-desc">Razonamiento avanzado</div>
+        </div>
+        <span class="model-tag tag-think">Think</span>
+      </div>
+      <div class="model-card" data-model="gemma-3" onclick="seleccionarModelo('gemma-3',this)">
+        <img class="model-logo" src="https://unpkg.com/@lobehub/icons-static-png@latest/light/google-color.png" alt="Google" loading="lazy">
+        <div class="model-info">
+          <div class="model-name">Google Gemma 3</div>
+          <div class="model-desc">Ligero, rapido y eficiente</div>
+        </div>
+        <span class="model-tag tag-fast">Flash</span>
+      </div>
+      <div class="model-card" data-model="llama-4-maverick" onclick="seleccionarModelo('llama-4-maverick',this)">
+        <img class="model-logo" src="https://unpkg.com/@lobehub/icons-static-png@latest/light/meta-color.png" alt="Meta" loading="lazy">
+        <div class="model-info">
+          <div class="model-name">Meta Llama 4 Maverick</div>
+          <div class="model-desc">17B params, 128e instruct</div>
+        </div>
+        <span class="model-tag tag-balanced">Pro</span>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h3>Proyecto</h3>
+    <button class="sidebar-btn" onclick="cargarProyecto()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg><span>Cargar proyecto</span></button>
+    <button class="sidebar-btn" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Subir archivos</span></button>
+    <input type="file" id="fileInput" multiple style="display:none" onchange="subirArchivos(event)">
+  </section>
+  <section>
+    <h3>Acciones</h3>
+    <button class="sidebar-btn" onclick="exportarChat()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Exportar TXT</span></button>
+    <button class="sidebar-btn" onclick="exportarHTML()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>Exportar HTML</span></button>
+    <button class="sidebar-btn" onclick="exportarJSON()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="10" y2="9"/></svg><span>Exportar JSON</span></button>
+    <button class="sidebar-btn" onclick="limpiarChat()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg><span>Limpiar</span></button>
+    <button class="sidebar-btn" onclick="toggleTema()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><span id="temaLabel">Tema claro</span></button>
+    <button class="sidebar-btn" onclick="abrirFunciones()" style="background:rgba(0,150,200,.08);color:var(--accent)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>100 Funciones</span></button>
+  </section>
+  <section>
+    <h3>Comunidad</h3>
+    <button class="sidebar-btn" onclick="window.open('https://discord.gg/TmFpJVqgKJ','_blank')" style="color:#5865f2;gap:6px"><svg viewBox="0 0 127.14 96.36" width="16" height="16" fill="#5865f2" style="flex-shrink:0"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,56.6,122.09,32.65,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.2,60,73.2,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg><span>Discord</span></button>
+  </section>
+  <div class="count" id="fileCount"></div>
+  <div id="fileList"></div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="btn-icon" onclick="toggleSidebar()" style="padding:2px 6px;background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:16px">&#9776;</button>
+      <div class="mode-pills" style="flex-shrink:0">
+        <button class="mode-btn active" data-mode="programmer" onclick="seleccionarModo('programmer',this)">Programador</button>
+        <button class="mode-btn" data-mode="student" onclick="seleccionarModo('student',this)">Estudiante</button>
+        <button class="mode-btn" data-mode="ideas" onclick="seleccionarModo('ideas',this)">Ideas</button>
+      </div>
+      <div class="mode-pills" style="flex-shrink:0">
+        <button class="mode-btn" data-depth="veloz" onclick="seleccionarProfundidad('veloz',this)">Veloz</button>
+        <button class="mode-btn active" data-depth="normal" onclick="seleccionarProfundidad('normal',this)">Normal</button>
+        <button class="mode-btn" data-depth="profundo" onclick="seleccionarProfundidad('profundo',this)">Profundo</button>
+      </div>
+      <span id="proyecto">MemeCraft Code</span>
+    </div>
+    <div class="topbar-right">
+      <button onclick="toggleChatSearch()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:0 4px" title="Buscar en chat (Ctrl+F)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <span id="modelBadge">DeepSeek V4 Flash</span>
+      <button onclick="abrirApiKey()" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:4px;cursor:pointer;font-size:9px;padding:2px 6px" title="Configurar API key">API Key</button>
+      <div class="status"><div class="status-dot" id="statusDot"></div><span id="statusText">Conectado</span></div>
+    </div>
+  </div>
+  <div class="chat-search" id="chatSearch">
+    <input type="text" id="chatSearchInput" placeholder="Buscar en el chat..." oninput="buscarEnChat(this.value)">
+    <span class="cs-count" id="chatSearchCount"></span>
+    <button onclick="toggleChatSearch()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:2px 6px">&#10005;</button>
+  </div>
+  <div class="chat-area" id="chatArea">
+    <div class="empty-chat">
+      <h1>MemeCraft Code</h1>
+      <p>Asistente inteligente · NVIDIA NIM</p>
+      <div id="tipContainer" style="margin-top:6px;height:20px;color:var(--text2);font-size:12px"></div>
+      <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;justify-content:center">
+        <button class="sidebar-btn" onclick="sendQuick('Explica qué es una API REST')" style="width:auto;padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:16px">Explicar API</button>
+        <button class="sidebar-btn" onclick="sendQuick('Genera un script Python para leer CSV')" style="width:auto;padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:16px">Python</button>
+        <button class="sidebar-btn" onclick="sendQuick('Detecta bugs en este código')" style="width:auto;padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:16px">Buscar bugs</button>
+        <button class="sidebar-btn" onclick="sendQuick('Refactoriza este código')" style="width:auto;padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:16px">Refactorizar</button>
+        <button class="sidebar-btn" onclick="sendQuick('Traduce al inglés')" style="width:auto;padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:16px">Traducir</button>
+      </div>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <div class="scroll-lock-indicator" id="scrollLockIndicator" onclick="scrollAlFinal()">&#9660; Nuevos mensajes</div>
+  </div>
+
+  <div class="viewer-panel" id="viewer">
+    <div class="viewer-header">
+      <div class="viewer-header-left">
+        <span class="vname" id="vname"></span>
+        <span class="vmeta" id="vmeta"></span>
+      </div>
+      <div class="viewer-header-actions">
+        <button class="btn-analyze" onclick="analizarArchivo()">Analizar con IA</button>
+        <button onclick="copiarArchivo()">Copiar codigo</button>
+        <button class="btn-close" onclick="cerrarViewer()">&#10005;</button>
+      </div>
+    </div>
+    <div class="viewer-body"><pre id="vcode"></pre></div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-area-inner">
+    <div class="input-expand" id="inputExpand"><pre id="inputPreview"></pre></div>
+    <div class="img-preview-area" id="imgPreviewArea"></div>
+    <div class="char-count" id="charCount"></div>
+    <div class="input-row">
+      <button class="btn-icon" onclick="document.getElementById('imgInput').click()" title="Subir imagen" style="font-size:14px;padding:5px 7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></button>
+      <input type="file" id="imgInput" accept="image/*" multiple style="display:none" onchange="agregarImagenes(event)">
+      <textarea id="input" rows="1" placeholder="Escribe un mensaje... (Enter=Enviar)" onkeydown="handleKey(event)" oninput="handleInput()" onpaste="handlePaste(event)"></textarea>
+      <button id="btn" onclick="enviar()">Enviar</button>
+      <button id="btnStop" onclick="detener()">Detener</button>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const NVIDIA_API = 'https://integrate.api.nvidia.com/v1/chat/completions';
+function customApiKey(){const k=localStorage.getItem('memecraft_apikey');return k||''}
+const STORAGE_KEY = 'memecraft_chat';
+const PROFUNDIDAD = {
+  veloz:{tempOffset:0,topPOffset:0,maxTokMult:0.5,thinking:false,reasoning:0},
+  normal:{tempOffset:0,topPOffset:0,maxTokMult:1,thinking:false,reasoning:0},
+  profundo:{tempOffset:-0.3,topPOffset:-0.05,maxTokMult:2,thinking:true,reasoning:16384}
+};
+const MODELS_API = {
+  'deepseek-v4-flash':{model:'deepseek-ai/deepseek-v4-flash',apiKey:'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',temperature:0.3,top_p:0.85,max_tokens:4096},
+  'deepseek-v4-pro':{model:'deepseek-ai/deepseek-v4-pro',apiKey:'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',temperature:0.7,top_p:0.92,max_tokens:32768,supportsThinking:true},
+  'qwen-3.5-397b':{model:'qwen/qwen3.5-397b-a17b',apiKey:'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',temperature:0.5,top_p:0.92,max_tokens:32768,supportsThinking:true},
+  'nemotron-3-super':{model:'nvidia/nemotron-3-super-120b-a12b',apiKey:'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',temperature:0.6,top_p:0.9,max_tokens:32768,supportsThinking:true},
+  'gemma-3':{model:'google/gemma-3n-e2b-it',apiKey:'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',temperature:0.2,top_p:0.7,max_tokens:512},
+  'llama-4-maverick':{model:'meta/llama-4-maverick-17b-128e-instruct',apiKey:'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',temperature:1,top_p:1,max_tokens:512}
+};
+let archivos=[], archivoActual=null, historial=[];
+let modeloActual = localStorage.getItem('memecraft_model') || 'deepseek-v4-flash';
+let modoActual = localStorage.getItem('memecraft_modo') || 'programmer';
+let profundidadActual = localStorage.getItem('memecraft_depth') || 'veloz';
+let controller = null;
+let generando = false;
+let tiempoExcedido = false;
+let ultimoEnvio = null;
+let tiempoInicio = 0;
+let scrollLock = false;
+let sidebarCollapsed = localStorage.getItem('memecraft_sidebar')==='1';
+let tipsInterval = null;
+let notifTitulo = document.title;
+let temaOscuro = localStorage.getItem('memecraft_theme') !== 'light';
+let ultimoPrompt = '';
+let imagenesAdjuntas = [];
+const MODELOS_MULTIMODAL = ['llama-4-maverick'];
+
+const NOMBRES_MODELO = {
+  'deepseek-v4-flash': 'DeepSeek V4 Flash',
+  'deepseek-v4-pro': 'DeepSeek V4 Pro',
+  'qwen-3.5-397b': 'Qwen 3.5 397B',
+  'nemotron-3-super': 'Nemotron 3 Super',
+  'gemma-3': 'Google Gemma 3',
+  'llama-4-maverick': 'Meta Llama 4 Maverick'
+};
+
+const MODO_PROMPTS = {
+  programmer: 'Eres MemeCraft Code, asistente experto de programación. Español. Usa bloques ``` para código. Sé conciso y profesional. Piensa paso a paso antes de responder, razona profundamente cada problema. Ayuda con debugging, refactorización, buenas prácticas y arquitectura de software. Analiza múltiples enfoques y elige el óptimo.',
+  student: 'Eres MemeCraft Code, tutor educativo experto. Español. Usa bloques ``` para código. Explica conceptos desde los fundamentos, razonando paso a paso. Conecta ideas nuevas con conocimientos previos. Usa analogías y ejemplos prácticos. Fomenta la comprensión profunda, no solo la memorización.',
+  ideas: 'Eres MemeCraft Code, estratega creativo. Español. Usa bloques ``` para código cuando sea relevante. Genera ideas innovadoras analizando desde múltiples perspectivas. Antes de sugerir, razona sobre pros, contras y viabilidad. Combina pensamiento lateral con análisis estructurado.'
+};
+
+const MODO_ICONOS = {
+  programmer: '',
+  student: '',
+  ideas: ''
+};
+
+const MODO_LABELS = {
+  programmer: 'Programador',
+  student: 'Estudiante',
+  ideas: 'Ideas'
+};
+
+// ===== PERSISTENCIA =====
+function guardarChat(){
+  const msgs=document.querySelectorAll('.msg');
+  const datos=[];
+  msgs.forEach(m=>{
+    const tipo=m.classList.contains('user')?'user':m.classList.contains('ai')?'ai':m.classList.contains('error')?'error':'system';
+    const imgs=[...m.querySelectorAll('.msg-img img')].map(img=>({dataUrl:img.src,name:img.alt}));
+    datos.push({tipo,texto:m.textContent,imagenes:imgs.length?imgs:undefined});
+  });
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({datos,historial,modelo:modeloActual,modo:modoActual,profundidad:profundidadActual}));
+  }catch(e){
+    if(e.name==='QuotaExceededError'||e.code===22){
+      const datosLivianos=datos.map(d=>({tipo:d.tipo,texto:d.texto}));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({datos:datosLivianos,historial:historial.slice(-10),modelo:modeloActual,modo:modoActual,profundidad:profundidadActual}));
+    }
+  }
+  localStorage.setItem('memecraft_model', modeloActual);
+  localStorage.setItem('memecraft_modo', modoActual);
+  localStorage.setItem('memecraft_depth', profundidadActual);
+}
+setInterval(guardarChat, 5000);
+
+function restaurarChat(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d.modelo) modeloActual = d.modelo;
+    if(d.modo) modoActual = d.modo;
+    if(d.profundidad) profundidadActual = d.profundidad;
+    if(d.historial) historial = d.historial;
+    if(d.datos&&d.datos.length){
+      document.querySelector('.empty-chat').style.display='none';
+      const m=document.getElementById('msgs');
+      d.datos.forEach(({tipo,texto,imagenes})=>{
+        const el=document.createElement('div');el.className='msg '+tipo;
+        let imgHtml='';
+        if(imagenes&&imagenes.length){
+          imgHtml='<div class="msg-img">'+imagenes.map(img=>`<img src="${img.dataUrl}" alt="${img.name||''}" title="${img.name||''}">`).join('')+'</div>';
+        }
+        if(tipo==='user'||tipo==='error'){
+          el.innerHTML=imgHtml+(texto||'');
+        } else {
+          el.innerHTML=`<div class="model-label">${MODO_ICONOS[modoActual]||''} ${MODO_LABELS[modoActual]||modoActual} · ${NOMBRES_MODELO[modeloActual]||modeloActual}</div>`+imgHtml+renderMsg(texto||'');
+        }
+        m.appendChild(el);
+      });
+    }
+  }catch{}
+}
+restaurarChat();
+
+// ===== MODE =====
+function seleccionarModo(id, btn) {
+  modoActual = id;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  guardarChat();
+}
+
+// ===== DEPTH =====
+function seleccionarProfundidad(id, btn) {
+  profundidadActual = id;
+  document.querySelectorAll('[data-depth]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  localStorage.setItem('memecraft_depth', id);
+}
+
+// ===== MODEL =====
+function seleccionarModelo(id, card) {
+  modeloActual = id;
+  document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+  if(card) card.classList.add('active');
+  document.getElementById('modelBadge').textContent = NOMBRES_MODELO[id] || id;
+  guardarChat();
+}
+
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+
+function str(v){return typeof v==='string'?v:typeof v=== 'object'&&v!==null?JSON.stringify(v,null,2):String(v)}
+
+function msgMultimodal(texto, imagenes=[], tipo='user'){
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');d.className='msg '+tipo;
+  const time=new Date();const ts=time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const actions=`<div class="msg-actions">${tipo==='user'?`<button onclick="editarMensaje(this)">Editar</button><button onclick="borrarMensaje(this)">Borrar</button>`:''}</div>`;
+  let imgHtml='';
+  if(imagenes.length){
+    imgHtml='<div class="msg-img">'+imagenes.map(img=>`<img src="${img.dataUrl}" alt="${img.name}" title="${img.name}">`).join('')+'</div>';
+  }
+  d.innerHTML=actions+imgHtml+(texto?renderMsg(texto):'')+`<div class="msg-time">${ts}</div>`;
+  m.appendChild(d);
+  if(!scrollLock)m.scrollIntoView({behavior:'smooth',block:'end'});
+  return d;
+}
+
+function msg(texto, tipo='ai') {
+  const m=document.getElementById('msgs');
+  const d=document.createElement('div');d.className='msg '+tipo;
+  const t=str(texto);
+  const time=new Date();const ts=time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const idx=document.querySelectorAll('.msg').length;
+  const actions=`<div class="msg-actions">${tipo==='user'?`<button onclick="editarMensaje(this)" title="Editar">Editar</button><button onclick="borrarMensaje(this)" title="Borrar">Borrar</button>`:tipo==='ai'?`<button onclick="regenerar(this)" title="Regenerar">Regenerar</button><button onclick="borrarMensaje(this)" title="Borrar">Borrar</button>`:''}</div>`;
+  if(tipo==='ai'){
+    const dur=tiempoInicio?` · ${((Date.now()-tiempoInicio)/1000).toFixed(1)}s`:'';
+    d.innerHTML=actions+`<div class="model-label">${MODO_ICONOS[modoActual]} ${MODO_LABELS[modoActual]} · ${NOMBRES_MODELO[modeloActual]||modeloActual}${dur}</div>`+renderMsg(t)+`<div class="msg-time">${ts}</div>`;
+    if(!document.hidden&&notifTitulo!==document.title) document.title=notifTitulo;
+  } else {
+    d.innerHTML=actions+renderMsg(t)+`<div class="msg-time">${ts}</div>`;
+    if(tipo==='user'){ultimoEnvio=d;setTimeout(()=>ultimoEnvio=null,5000)}
+  }
+  m.appendChild(d);
+  if(!scrollLock)m.scrollIntoView({behavior:'smooth',block:'end'});
+  return d;
+}
+
+function copiarMsg(btn){
+  const msg=btn.closest('.msg');
+  const txt=msg.textContent.trim();
+  const timeEl=msg.querySelector('.msg-time');
+  const final=txt.replace(timeEl?timeEl.textContent:'','').trim();
+  navigator.clipboard.writeText(final).then(()=>{btn.textContent='Hecho';setTimeout(()=>btn.textContent='Copiar',2000)});
+}
+
+function linkify(t){
+  return t.replace(/\b(https?:\/\/[^\s<]+[^\s<.,;:!?)])\b/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/__(.+?)__/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/_(.+?)_/g,'<em>$1</em>')
+        .replace(/~~(.+?)~~/g,'<del>$1</del>');
+}
+function inlineCode(t){return t.replace(/`([^`]+)`/g,'<code>$1</code>')}
+
+function renderMsg(txt) {
+  const parts=txt.split(/(```(\w*)\n?([\s\S]*?)```)/g);
+  let out='',i=0;
+  while(i<parts.length){
+    if(parts[i]&&parts[i].startsWith('```')){
+      const lang=parts[i+1]||'',code=parts[i+2]||'';
+      const langName=lang||'text';
+      out+=`<div class="code-block"><div class="code-hdr"><span>${esc(langName)}</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div><pre><code>${esc(code)}</code></pre></div>`;
+      i+=4;
+    } else {
+      let block=parts[i]||'';
+      const lines=block.split('\n');
+      let j=0;
+      while(j<lines.length){
+        const l=lines[j];
+        if(l&&l.trim().startsWith('|')&&j+1<lines.length&&lines[j+1].match(/^\|[\s:-]+\|/)){
+          let rows=[];
+          while(j<lines.length&&lines[j]&&lines[j].trim().startsWith('|')){
+            rows.push(lines[j].trim());
+            j++;
+          }
+          if(rows.length>=2){
+            out+='<table style="border-collapse:collapse;margin:6px 0;font-size:12px;width:100%">';
+            const hdr=rows[0].split('|').filter(c=>c.trim()!=='').map(c=>esc(c.trim()));
+            out+='<thead><tr>'+hdr.map(c=>'<th style="border:1px solid var(--border);padding:4px 8px;background:var(--bg3);text-align:left">'+c+'</th>').join('')+'</tr></thead>';
+            if(rows.length>2){
+              out+='<tbody>';
+              for(let r=2;r<rows.length;r++){
+                const cells=rows[r].split('|').filter(c=>c.trim()!=='').map(c=>esc(c.trim()));
+                out+='<tr>'+cells.map(c=>'<td style="border:1px solid var(--border);padding:4px 8px">'+c+'</td>').join('')+'</tr>';
+              }
+              out+='</tbody>';
+            }
+            out+='</table>';
+          }
+        } else {
+          out+=inlineCode(linkify(esc(l)))+(j<lines.length-1?'<br>':'');
+          j++;
+        }
+      }
+      i++;
+    }
+  }
+  return out;
+}
+
+function copyCode(btn){
+  const code=btn.parentElement.nextElementSibling.textContent;
+  navigator.clipboard.writeText(code).then(()=>{btn.textContent='Copiado';setTimeout(()=>btn.textContent='Copiar',2000)});
+}
+
+function mostrarTipeo(){const t=document.createElement('div');t.className='typing-indicator';t.id='typing';t.innerHTML='<span></span><span></span><span></span>';document.getElementById('msgs').appendChild(t)}
+function ocultarTipeo(){const e=document.getElementById('typing');if(e)e.remove()}
+
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar()}
+  if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();enviar()}
+  if(e.key==='l'&&e.ctrlKey){e.preventDefault();limpiarChat()}
+  if(e.key==='e'&&e.ctrlKey){e.preventDefault();exportarChat()}
+  if(e.key==='j'&&e.ctrlKey){e.preventDefault();exportarJSON()}
+  if(e.key==='f'&&e.ctrlKey){e.preventDefault();toggleChatSearch()}
+  if(e.key==='z'&&e.ctrlKey&&!e.shiftKey){e.preventDefault();undoLastSend()}
+  if(e.key==='1'&&e.ctrlKey){e.preventDefault();const c=document.querySelector('.model-card');if(c)seleccionarModelo('deepseek-v4-flash',c)}
+  if(e.key==='2'&&e.ctrlKey){e.preventDefault();const c=document.querySelectorAll('.model-card')[1];if(c)seleccionarModelo('deepseek-v4-pro',c)}
+  if(e.key==='3'&&e.ctrlKey){e.preventDefault();const c=document.querySelectorAll('.model-card')[2];if(c)seleccionarModelo('qwen-3.5-397b',c)}
+  if(e.key==='4'&&e.ctrlKey){e.preventDefault();const c=document.querySelectorAll('.model-card')[3];if(c)seleccionarModelo('nemotron-3-super',c)}
+  if(e.key==='5'&&e.ctrlKey){e.preventDefault();const c=document.querySelectorAll('.model-card')[4];if(c)seleccionarModelo('gemma-3',c)}
+  if(e.key==='6'&&e.ctrlKey){e.preventDefault();const c=document.querySelectorAll('.model-card')[5];if(c)seleccionarModelo('llama-4-maverick',c)}
+  if(e.key==='?'&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&document.activeElement!==document.getElementById('input')&&document.activeElement!==document.getElementById('chatSearchInput')){e.preventDefault();abrirShortcuts()}
+}
+function handleInput(){
+  const el=document.getElementById('input'),ex=document.getElementById('inputExpand'),pv=document.getElementById('inputPreview'),cc=document.getElementById('charCount');
+  if(el.value.length>200){pv.textContent=el.value;ex.classList.add('open')}else{ex.classList.remove('open')}
+  const len=el.value.length;
+  cc.textContent=len>0?`${len} caracteres`:'';
+  cc.classList.toggle('show',len>0);
+}
+
+function detener(){
+  tiempoExcedido=false;
+  if(controller){controller.abort();controller=null}
+  ocultarTipeo();
+  document.getElementById('btn').style.display='';
+  document.getElementById('btnStop').style.display='none';
+  document.getElementById('btn').disabled=false;
+  generando=false;
+}
+
+let msgStreamEl = null;
+
+async function enviar() {
+  if(generando) return;
+  const i=document.getElementById('input'),b=document.getElementById('btn');
+  const t=i.value.trim();if(!t && !imagenesAdjuntas.length)return;
+  const textoEnviar=t;
+  i.value='';handleInput();
+  const esMultimodal=MODELOS_MULTIMODAL.includes(modeloActual);
+  const imgsParaEnviar=imagenesAdjuntas.slice();
+  if(imgsParaEnviar.length && !esMultimodal){
+    const nom=document.querySelector('.model-card.active .model-name')?document.querySelector('.model-card.active .model-name').textContent:modeloActual;
+    msgMultimodal('',imgsParaEnviar,'system');
+    const errEl=document.createElement('div');
+    errEl.className='msg system error-msg';
+    errEl.innerHTML=`<div class="label" style="color:var(--red)">Sistema</div><div style="padding:8px 0">El modelo <strong>${nom}</strong> no soporta imagenes. Cambia a Meta Llama 4 Maverick o quita las imagenes.</div>`;
+    document.getElementById('msgs').appendChild(errEl);
+    document.querySelector('.empty-chat').style.display='none';
+    scrollAlFinal();
+    imagenesAdjuntas=[];renderPreviews();
+    return;
+  }
+  imagenesAdjuntas=[];renderPreviews();
+  msgMultimodal(textoEnviar,imgsParaEnviar,'user');
+  let userContent;
+  if(esMultimodal && imgsParaEnviar.length){
+    userContent=[{type:'text',text:textoEnviar||'Describe esta imagen'}];
+    imgsParaEnviar.forEach(img=>userContent.push({type:'image_url',image_url:{url:img.dataUrl}}));
+  } else {
+    userContent=textoEnviar;
+  }
+  historial.push({role:'user',content:userContent});guardarChat();
+  mostrarTipeo();
+  b.style.display='none';
+  document.getElementById('btnStop').style.display='';
+  generando=true;
+  controller=new AbortController();
+  const timeoutId=setTimeout(()=>{if(controller){controller.abort();tiempoExcedido=true}},60000);
+  tiempoInicio=Date.now();
+  scrollLock=false;
+  document.getElementById('scrollLockIndicator').classList.remove('show');
+  if(document.hidden) document.title='Generando... · MemeCraft Code';
+
+  try{
+    let ctx='';
+    if(archivoActual)ctx=`\nArchivo: ${archivoActual.name}\n\`\`\`${archivoActual.ext}\n${archivoActual.content}\n\`\`\`\n`;
+    const sysPrompt = MODO_PROMPTS[modoActual] || MODO_PROMPTS.programmer;
+    const msgs=esMultimodal?[{role:'system',content:sysPrompt},{role:'user',content:userContent}]:[{role:'system',content:sysPrompt},{role:'user',content:ctx+textoEnviar}];
+    const cfg=MODELS_API[modeloActual];
+    if(!cfg)throw new Error('Configuracion de modelo no encontrada');
+    const depth=PROFUNDIDAD[profundidadActual]||PROFUNDIDAD.normal;
+    const maxTok=Math.round(cfg.max_tokens*depth.maxTokMult);
+    const temp=Math.max(0.1,Math.min(2,cfg.temperature+depth.tempOffset));
+    const topP=Math.max(0.1,Math.min(1,cfg.top_p+depth.topPOffset));
+    const payload={model:cfg.model,messages:msgs,temperature:temp,top_p:topP,max_tokens:maxTok,stream:true};
+    if(depth.thinking&&cfg.supportsThinking){payload.chat_template_kwargs={enable_thinking:true,thinking:true};payload.reasoning_budget=depth.reasoning;}
+    const apiKey=customApiKey()||cfg.apiKey;
+    const r=await fetch(NVIDIA_API,{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify(payload)});
+    clearTimeout(timeoutId);
+
+    const ct = r.headers.get('Content-Type') || '';
+
+    if (ct.includes('text/event-stream')) {
+      ocultarTipeo();
+      if (!r.body) throw new Error('Streaming no disponible');
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '', fullContent = '';
+      const aiEl = document.createElement('div');
+      aiEl.className = 'msg ai';
+      aiEl.innerHTML = `<div class="model-label">${MODO_ICONOS[modoActual]||''} ${MODO_LABELS[modoActual]||modoActual} · ${NOMBRES_MODELO[modeloActual]||modeloActual}</div><div class="msg-content streaming"></div>`;
+      document.getElementById('msgs').appendChild(aiEl);
+      const cd = aiEl.querySelector('.msg-content');
+      msgStreamEl = aiEl;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const d = line.slice(6).trim();
+            if (!d || d === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(d);
+              const delta = parsed.choices?.[0]?.delta?.content || '';
+              if (delta) { fullContent += delta; cd.textContent = fullContent; if (!scrollLock) window.scrollTo(0, document.body.scrollHeight); }
+            } catch {}
+          }
+        }
+      }
+      msgStreamEl = null;
+      cd.classList.remove('streaming');
+      cd.innerHTML = renderMsg(fullContent);
+      historial.push({role:'assistant',content:str(fullContent)});
+      if(historial.length>12)historial=[historial[0],...historial.slice(-10)];
+      guardarChat();
+      if(document.hidden){document.title='Mensaje nuevo · MemeCraft Code';setTimeout(()=>document.title=notifTitulo,3000)}
+    } else {
+      ocultarTipeo();let d;try{d=await r.json()}catch{d=null}
+      if(!r.ok)throw new Error((d&&d.error)||`Error ${r.status}`);
+      const reply=d&&d.choices?.[0]?.message?.content;
+      if(reply===undefined||reply===null)throw new Error('La API no devolvió respuesta');
+      historial.push({role:'assistant',content:str(reply)});
+      if(historial.length>12)historial=[historial[0],...historial.slice(-10)];
+      msg(reply,'ai');
+      guardarChat();
+      if(document.hidden){document.title='Mensaje nuevo · MemeCraft Code';setTimeout(()=>document.title=notifTitulo,3000)}
+    }
+  }catch(e){
+    clearTimeout(timeoutId);
+    ocultarTipeo();
+    if(e.name==='AbortError'){
+      if(tiempoExcedido){msg('La solicitud tardó demasiado. Revisa tu conexión o intenta con otro modelo.','error')}
+      else if(msgStreamEl){
+        const cd = msgStreamEl.querySelector('.msg-content');
+        if(cd) {
+          cd.classList.remove('streaming');
+          cd.innerHTML = (cd.textContent || '') + '<br><em style="color:#888">Generación detenida</em>';
+          historial.push({role:'assistant',content:str(cd.textContent || '')});
+          guardarChat();
+        }
+        msgStreamEl = null;
+      } else { msg('Generación detenida','system'); }
+      tiempoExcedido=false;
+    }
+    else{const m=e.message;if(m.match(/fetch|Network|Failed to fetch|ENOTFOUND|ECONN/i))msg('No se pudo conectar con la API de NVIDIA. Revisa tu conexion a internet o la clave API.','error');else if(m.match(/402|429|quota|exhausted|limit|rate/i))msg('Limite de API alcanzado. Las claves integradas se agotaron. Usa el boton "API Key" en la barra superior para poner tu propia clave de NVIDIA.','error');else msg(m,'error')}
+    document.title=notifTitulo;
+  }
+  b.style.display='';
+  document.getElementById('btnStop').style.display='none';
+  b.disabled=false;i.focus();
+  generando=false;controller=null;
+}
+
+function sendQuick(t){document.getElementById('input').value=t;enviar()}
+
+function editarMensaje(btn){
+  const msg=btn.closest('.msg');
+  const content=msg.querySelector('.msg-content');
+  const txt=content?content.textContent:msg.textContent;
+  msg.innerHTML=`<div class="msg-edit-box"><textarea class="edit-textarea">${esc(txt)}</textarea><div class="msg-edit-actions"><button class="msg-edit-save" onclick="guardarEdicion(this)">Guardar</button><button class="msg-edit-cancel" onclick="cancelarEdicion(this)">Cancelar</button></div></div>`;
+  msg.querySelector('.edit-textarea').focus();
+}
+function guardarEdicion(btn){
+  const msg=btn.closest('.msg');
+  const ta=msg.querySelector('.edit-textarea');
+  const txt=ta.value;
+  const time=new Date();const ts=time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const actions=`<div class="msg-actions"><button onclick="editarMensaje(this)">Editar</button><button onclick="borrarMensaje(this)">Borrar</button></div>`;
+  msg.innerHTML=actions+renderMsg(txt)+`<div class="msg-time">${ts}</div>`;
+  msg.className='msg user';
+  guardarChat();
+}
+function cancelarEdicion(btn){
+  const msg=btn.closest('.msg');
+  const ta=msg.querySelector('.edit-textarea');
+  const orig=ta.defaultValue;
+  const time=new Date();const ts=time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  const actions=`<div class="msg-actions"><button onclick="editarMensaje(this)">Editar</button><button onclick="borrarMensaje(this)">Borrar</button></div>`;
+  msg.innerHTML=actions+renderMsg(orig)+`<div class="msg-time">${ts}</div>`;
+  msg.className='msg user';
+}
+function borrarMensaje(btn){
+  if(!confirm('Borrar este mensaje?'))return;
+  const msg=btn.closest('.msg');
+  msg.remove();
+  guardarChat();
+}
+function regenerar(btn){
+  if(generando)return;
+  const msgs=document.querySelectorAll('.msg');
+  let lastUser='';
+  for(let i=msgs.length-1;i>=0;i--){
+    if(msgs[i].classList.contains('user')){lastUser=msgs[i].textContent;break;}
+  }
+  if(!lastUser)return;
+  const msgEl=btn.closest('.msg');
+  const idx=[...msgs].indexOf(msgEl);
+  let removeEls=[];
+  for(let i=idx;i<msgs.length;i++){removeEls.push(msgs[i]);}
+  removeEls.forEach(el=>el.remove());
+  document.getElementById('input').value=lastUser;
+  enviar();
+}
+
+function exportarJSON(){
+  guardarChat();
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw){alert('No hay chat para exportar');return;}
+  const blob=new Blob([raw],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`memecraft-${Date.now()}.json`;a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function toggleTema(){
+  temaOscuro=!temaOscuro;
+  document.documentElement.classList.toggle('light',!temaOscuro);
+  localStorage.setItem('memecraft_theme',temaOscuro?'dark':'light');
+  document.getElementById('temaLabel').textContent=temaOscuro?'Tema claro':'Tema oscuro';
+}
+
+function exportarHTML(){
+  const msgs=document.querySelectorAll('.msg');
+  if(!msgs.length)return;
+  let html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>MemeCraft Code - Chat</title><style>body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:20px}.msg{margin:12px 0;padding:10px 14px;border-radius:6px;line-height:1.5;font-size:14px}.user{background:#0096c8;color:#fff;text-align:right}.ai{background:#21262d;border:1px solid #30363d}.label{font-size:10px;color:#8b949e;margin-bottom:4px}pre{background:#0a0a0a;border:1px solid #222;padding:10px;border-radius:5px;overflow-x:auto}code{font-family:Consolas,monospace;font-size:12px;color:#3fb950}</style></head><body><h1 style="color:#0096c8">MemeCraft Code - Chat</h1><p style="color:#8b949e;font-size:12px">${new Date().toLocaleString()}</p><hr style="border-color:#30363d">`;
+  msgs.forEach(m=>{
+    const tipo=m.classList.contains('user')?'Tu':m.classList.contains('ai')?'MemeCraft Code':'Sistema';
+    const cls=m.classList.contains('user')?'user':'ai';
+    html+=`<div class="msg ${cls}"><div class="label">${tipo}</div>${m.innerHTML}</div>`;
+  });
+  html+=`</body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`memecraft-${Date.now()}.html`;a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportarChat(){
+  const msgs=document.querySelectorAll('.msg');
+  if(!msgs.length)return;
+  let txt='MemeCraft Code - Chat\n'+new Date().toLocaleString()+'\n'+'='.repeat(40)+'\n\n';
+  msgs.forEach(m=>{
+    const tipo=m.classList.contains('user')?'Tu':m.classList.contains('ai')?'MemeCraft Code':'Sistema';
+    txt+=`[${tipo}]\n${m.textContent}\n\n`;
+  });
+  const blob=new Blob([txt],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`memecraft-${Date.now()}.txt`;a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ===== NEW FEATURES =====
+function toggleChatSearch(){
+  const el=document.getElementById('chatSearch');
+  el.classList.toggle('open');
+  if(el.classList.contains('open')){document.getElementById('chatSearchInput').focus()}else{document.getElementById('chatSearchInput').value='';buscarEnChat('')}
+}
+function buscarEnChat(v){
+  const q=v.toLowerCase().trim();
+  const msgs=document.querySelectorAll('.msg');
+  let count=0;
+  msgs.forEach(m=>{
+    const t=m.textContent.toLowerCase();
+    const match=!q||t.includes(q);
+    m.style.display=match?'':'none';
+    if(match&&q)count++;
+  });
+  document.getElementById('chatSearchCount').textContent=q?`${count} resultados`:'';
+
+  if(q&&count===0){
+  }else if(!q){document.getElementById('chatSearchCount').textContent=''}
+}
+
+function toggleSidebarColapso(){
+  sidebarCollapsed=!sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed',sidebarCollapsed);
+  localStorage.setItem('memecraft_sidebar',sidebarCollapsed?'1':'0');
+}
+
+function handlePaste(e){
+  const items=e.clipboardData.items;
+  for(const item of items){
+    if(item.type.startsWith('image/')){
+      e.preventDefault();
+      const blob=item.getAsFile();
+      comprimirImagen(blob).then(dataUrl=>{
+        imagenesAdjuntas.push({name:'portapapeles.png',dataUrl,size:blob.size});
+        renderPreviews();
+      });
+    }
+  }
+}
+
+function comprimirImagen(file, maxW=800, calidad=0.5){
+  return new Promise(res => {
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const img=new Image();
+      img.onload=function(){
+        let w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*maxW/w);w=maxW}
+        if(h>maxW){w=Math.round(w*maxW/h);h=maxW}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg',calidad));
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function agregarImagenes(e){
+  const files=[...e.target.files];
+  e.target.value='';
+  for(const f of files){
+    if(!f.type.startsWith('image/'))continue;
+    const dataUrl=await comprimirImagen(f);
+    imagenesAdjuntas.push({name:f.name,dataUrl,size:f.size});
+  }
+  renderPreviews();
+}
+
+function renderPreviews(){
+  const el=document.getElementById('imgPreviewArea');
+  if(!imagenesAdjuntas.length){el.innerHTML='';return}
+  el.innerHTML=imagenesAdjuntas.map((img,i)=>
+    `<div class="img-preview-item"><img src="${img.dataUrl}" alt=""><button class="img-remove" onclick="quitarImagen(${i})">&#10005;</button></div>`
+  ).join('');
+}
+
+function quitarImagen(i){
+  imagenesAdjuntas.splice(i,1);
+  renderPreviews();
+}
+
+function undoLastSend(){
+  if(!ultimoEnvio||generando)return;
+  const txt=ultimoEnvio.textContent.replace(/^\d{1,2}:\d{2}$/,'').trim();
+  if(document.getElementById('input').value) document.getElementById('input').value=txt+' '+document.getElementById('input').value;
+  else document.getElementById('input').value=txt;
+  ultimoEnvio.remove();
+  historial.pop();
+  ultimoEnvio=null;
+  guardarChat();
+  document.getElementById('input').focus();
+}
+
+let TIPS = ['Hover sobre mensajes: Editar, Borrar o Regenerar respuesta','Presiona ? para ver todos los atajos de teclado','Ctrl+1 a Ctrl+4 cambian de modelo al instante','Los enlaces en los mensajes son clickeables','Pega imagenes directamente desde el portapapeles','Cada 5 segundos el chat se guarda automaticamente','Exporta el chat como TXT, HTML o JSON','El codigo se resalta automaticamente en mas de 30 lenguajes','Usa **negritas**, *cursiva* y ~~tachado~~ en los mensajes','Las tablas Markdown se renderizan como tablas HTML','Tema claro/oscuro disponible en el sidebar','Discord: comunidad activa para compartir tips'];
+let tipIdx=0;
+function rotarTips(){
+  if(!document.querySelector('.empty-chat:not([style*="display: none"])'))return;
+  const c=document.getElementById('tipContainer');
+  if(!c)return;
+  c.innerHTML=`<div style="display:flex;align-items:center;gap:6px"><span>${TIPS[tipIdx]}</span> <button class="tip-btn" onclick="tipIdx=(tipIdx+1)%${TIPS.length};rotarTips()" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:4px;padding:1px 6px;cursor:pointer;font-size:10px">Siguiente</button></div>`;
+  tipIdx=(tipIdx+1)%TIPS.length;
+}
+if(tipsInterval)clearInterval(tipsInterval);
+tipsInterval=setInterval(rotarTips,6000);
+setTimeout(rotarTips,500);
+
+function scrollAlFinal(){
+  document.getElementById('msgs').scrollIntoView({behavior:'smooth',block:'end'});
+  scrollLock=false;
+  document.getElementById('scrollLockIndicator').classList.remove('show');
+}
+
+// Auto-scroll lock
+document.getElementById('chatArea').addEventListener('scroll',function(){
+  const d=this.scrollHeight-this.scrollTop-this.clientHeight;
+  scrollLock=d>100;
+  document.getElementById('scrollLockIndicator').classList.toggle('show',scrollLock);
+});
+
+function abrirShortcuts(){document.getElementById('modalShortcuts').classList.add('open')}
+function cerrarShortcuts(){document.getElementById('modalShortcuts').classList.remove('open')}
+
+// Add ? key to global listener
+const origKey=document.addEventListener;
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){cerrarViewer();if(generando)detener();cerrarFunciones();cerrarShortcuts();cerrarApiKey()}
+});
+
+// =============================
+// ========== FILES ============
+// =============================
+function subirArchivos(e){procesarArchivos(e.target.files);e.target.value=''}
+async function procesarArchivos(files){
+  if(!files.length)return;
+  for(const f of files){
+    try{
+      const ext=(f.name.match(/\.(\w+)$/)||['',''])[1].toLowerCase();
+      if(['png','jpg','jpeg','gif','bmp','ico','mp3','mp4','avi','mov','exe','dll','zip','rar','7z','woff','woff2','ttf','eot','pdf'].includes(ext))continue;
+      const content=await f.text();
+      archivos.push({name:f.name,content,size:f.size,lines:content.split('\n').length,ext});
+    }catch{}
+  }
+  renderFileList();
+}
+
+async function cargarProyecto(){
+  const inp=document.createElement('input');inp.type='file';inp.webkitdirectory=true;
+  inp.onchange=async e=>{
+    const fs=e.target.files;if(!fs.length)return;
+    archivos=[];archivoActual=null;cerrarViewer();
+    for(const f of fs){
+      if(f.size>2*1024*1024)continue;
+      try{
+        const ext=(f.name.match(/\.(\w+)$/)||['',''])[1].toLowerCase();
+        if(!['cs','js','ts','py','html','css','scss','json','xml','md','txt','java','cpp','c','h','hpp','go','rs','rb','php','yml','yaml','vue','svelte','jsx','tsx','sql','sh','bat','ps1','dockerfile','csproj','sln','config','props','targets','toml','kt','swift','dart','r','m','mm','zig','lua','pl'].includes(ext))continue;
+        const content=await f.text();
+        archivos.push({name:f.webkitRelativePath,content,size:f.size,lines:content.split('\n').length,ext});
+      }catch{}
+    }
+    const nombre=fs[0].webkitRelativePath.split('/')[0];
+    document.getElementById('proyecto').textContent=`${nombre}  (${archivos.length} archivos)`;
+    renderFileList();
+  };
+  inp.click();
+}
+
+function renderFileList(){
+  const el=document.getElementById('fileList'),cnt=document.getElementById('fileCount');
+  cnt.textContent=archivos.length?`${archivos.length} archivos`:'';
+  if(!archivos.length){el.innerHTML='<div style="text-align:center;padding:24px 10px;color:var(--text2);font-size:11px">Carga un proyecto o archivos</div>';return}
+  el.innerHTML=archivos.map((a,i)=>`<div class="file-item${a===archivoActual?' active':''}" onclick="abrirArchivo(${i})"><span class="ext-badge">${a.ext}</span> ${a.name.split('/').pop()}</div>`).join('');
+}
+
+function abrirArchivo(i){
+  const a=archivos[i];if(!a)return;
+  archivoActual=a;renderFileList();
+  document.getElementById('proyecto').textContent=`${a.name}`;
+  document.getElementById('viewer').classList.add('open');
+  document.getElementById('vname').textContent=a.name.split('/').pop();
+  document.getElementById('vmeta').textContent=`${a.lines} líneas · ${(a.size/1024).toFixed(1)} KB`;
+  const lines=a.content.split('\n');
+  const nums=lines.map((_,i)=>String(i+1).padStart(4,' ')).join('\n');
+  const code=lines.map(l=>{
+    let h=l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    h=h.replace(/(\/\/.*$)/g,'<span style="color:#8b949e">$1</span>');
+    h=h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span style="color:#a5d6ff">$1</span>');
+    h=h.replace(/\b(function|class|var|let|const|if|else|for|while|return|import|export|from|async|await|using|namespace|public|private|static|void|int|string|bool|new|this|null|true|false|try|catch|throw|enum|interface|partial|get|set|value)\b/g,'<span style="color:#c586c0">$1</span>');
+    return h;
+  }).join('\n');
+  document.getElementById('vcode').innerHTML='<span style="float:left;text-align:right;padding-right:12px;color:var(--text2);user-select:none;opacity:.4;border-right:1px solid #222;margin-right:12px;white-space:pre">'+nums+'</span>'+code;
+}
+
+function cerrarViewer(){document.getElementById('viewer').classList.remove('open')}
+
+async function analizarArchivo(){
+  if(!archivoActual)return;
+  document.getElementById('input').value=`Analiza este archivo y dame sugerencias de mejora:\n\`\`\`${archivoActual.ext}\n${archivoActual.content.substring(0,3000)}\n\`\`\``;
+  enviar();
+}
+
+async function copiarArchivo(){
+  if(!archivoActual)return;
+  try{
+    await navigator.clipboard.writeText(archivoActual.content);
+    const btns=document.querySelectorAll('.viewer-header-actions button');
+    const btn=btns[1];const orig=btn.textContent;btn.textContent='Copiado';setTimeout(()=>btn.textContent=orig,2000);
+  }catch{}
+}
+
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+
+function limpiarChat(){
+  if(generando)detener();
+  document.getElementById('msgs').innerHTML='';
+  archivoActual=null;historial=[];cerrarViewer();
+  localStorage.removeItem(STORAGE_KEY);
+  document.querySelector('.empty-chat').style.display='';
+   if(archivos.length)renderFileList();
+  document.getElementById('proyecto').textContent='MemeCraft Code';
+}
+
+// =============================
+// ===== API KEY (BYOK) ========
+// =============================
+function abrirApiKey(){document.getElementById('modalApiKey').classList.add('open')}
+function cerrarApiKey(){document.getElementById('modalApiKey').classList.remove('open')}
+function guardarApiKey(){
+  const val=document.getElementById('customApiKey').value.trim();
+  if(val){
+    localStorage.setItem('memecraft_apikey',val);
+    document.getElementById('customApiKeyStatus').textContent='Clave guardada';
+  }else{
+    localStorage.removeItem('memecraft_apikey');
+    document.getElementById('customApiKeyStatus').textContent='Usando claves integradas';
+  }
+  setTimeout(()=>document.getElementById('customApiKeyStatus').textContent='',2000);
+}
+function limpiarApiKey(){
+  localStorage.removeItem('memecraft_apikey');
+  document.getElementById('customApiKey').value='';
+  document.getElementById('customApiKeyStatus').textContent='Usando claves integradas';
+  setTimeout(()=>document.getElementById('customApiKeyStatus').textContent='',2000);
+}
+// Load saved key on startup
+(function(){const k=localStorage.getItem('memecraft_apikey');if(k)document.getElementById('customApiKey')&&(document.getElementById('customApiKey').value=k)})()
+
+// =============================
+// ===== 100 FUNCIONES ========
+// =============================
+const FUNCIONES = [
+  {cat:'Chat', items:[
+    {name:'Markdown completo',desc:'Formatea mensajes con Markdown: negritas, listas, tablas y mas'},
+    {name:'Bloques de codigo',desc:'Inserta codigo con resaltado de sintaxis automatico'},
+    {name:'Resaltado sintaxis',desc:'Colorea keywords, strings y comentarios en mas de 30 lenguajes'},
+    {name:'Copiar codigo 1-click',desc:'Copia cualquier bloque de codigo con un solo clic'},
+    {name:'Editar mensaje',desc:'Edita mensajes enviados para corregir o mejorar'},
+    {name:'Eliminar mensaje',desc:'Borra mensajes individuales del historial'},
+    {name:'Reintentar respuesta',desc:'Vuelve a generar la respuesta de la IA'},
+    {name:'Buscar en chat',desc:'Encuentra mensajes rapidamente en el historial'},
+    {name:'Fijar mensajes',desc:'Marca mensajes importantes para acceso rapido'},
+    {name:'Responder citando',desc:'Cita un mensaje anterior al responder'}
+  ]},
+  {cat:'Modelos IA', items:[
+    {name:'4 modelos NVIDIA NIM',desc:'DeepSeek Flash, DeepSeek Pro, Qwen 397B, Nemotron Super'},
+    {name:'Control de temperatura',desc:'Ajusta la creatividad del modelo (0.0 preciso - 2.0 creativo)'},
+    {name:'Maximo de tokens',desc:'Controla la longitud maxima de las respuestas'},
+    {name:'Prompt personalizado',desc:'Edita el system prompt para cambiar el comportamiento'},
+    {name:'Contexto ajustable',desc:'Configura cuanto contexto usa el modelo'},
+    {name:'Personalidad IA',desc:'Elige entre 3 modos: Programador, Estudiante, Ideas'},
+    {name:'Formato respuesta',desc:'Elige entre respuestas concisas o detalladas'},
+    {name:'Streaming toggle',desc:'Activa/desactiva la generacion en tiempo real'},
+    {name:'Cambio rapido modelo',desc:'Cambia de modelo al instante desde el sidebar'},
+    {name:'Comparar respuestas',desc:'Compara respuestas de 2 modelos lado a lado'}
+  ]},
+  {cat:'Archivos', items:[
+    {name:'Cargar proyecto',desc:'Carga un proyecto completo con estructura de directorios'},
+    {name:'Subir archivos',desc:'Sube archivos individuales para analisis'},
+    {name:'Visor de codigo',desc:'Visualiza archivos con numeros de linea y resaltado'},
+    {name:'Numeros de linea',desc:'Cada linea numerada para referencia precisa'},
+    {name:'Resaltado sintaxis',desc:'Colorea keywords, strings, comentarios automaticamente'},
+    {name:'Analizar con IA',desc:'Envia el archivo actual a la IA para analisis'},
+    {name:'Copiar codigo',desc:'Copia el contenido completo del archivo abierto'},
+    {name:'Arrastrar y soltar',desc:'Arrastra archivos directamente al chat'},
+    {name:'Filtrar por extension',desc:'Filtra archivos por tipo en la lista lateral'},
+    {name:'Descargar archivo',desc:'Descarga cualquier archivo del proyecto'}
+  ]},
+  {cat:'Codigo', items:[
+    {name:'Keywords coloreados',desc:'Palabras clave del lenguaje en color purpura'},
+    {name:'Strings resaltados',desc:'Cadenas de texto en color azul claro'},
+    {name:'Comentarios',desc:'Comentarios de codigo en gris tenue'},
+    {name:'30+ lenguajes',desc:'Soporte para JS, Python, C#, Java, Go, Rust y mas'},
+    {name:'Deteccion automatica',desc:'Detecta el lenguaje del archivo automaticamente'},
+    {name:'Tamano de pestanas',desc:'Configura la indentacion: 2, 4 u 8 espacios'},
+    {name:'Ajuste de linea',desc:'Activa/desactiva el word wrap en el visor'},
+    {name:'Vista de archivos',desc:'Navega entre multiples archivos del proyecto'},
+    {name:'Busqueda en archivos',desc:'Busca texto dentro de los archivos del proyecto'},
+    {name:'Archivo activo',desc:'El archivo actual se resalta en la lista lateral'}
+  ]},
+  {cat:'Productividad', items:[
+    {name:'Atajos de teclado',desc:'Enter=Enviar, Ctrl+L=Limpiar, Ctrl+E=Exportar, Escape=Detener'},
+    {name:'Auto-guardado',desc:'Chat guardado automaticamente cada 5 segundos'},
+    {name:'Fragmentos rapidos',desc:'Inserta fragmentos de codigo comunes'},
+    {name:'Plantillas de codigo',desc:'Usa plantillas predefinidas para empezar rapido'},
+    {name:'Paleta de comandos (Ctrl+K)',desc:'Accede a todas las funciones desde el teclado'},
+    {name:'Acciones rapidas',desc:'Botones de accion directa en el inicio del chat'},
+    {name:'Timer Pomodoro',desc:'Temporizador de productividad integrado'},
+    {name:'Bloc de notas',desc:'Panel de notas rapido para ideas temporales'},
+    {name:'Auto-mejora continua',desc:'Loop automatico que mejora el sistema cada 30s'},
+    {name:'Multi-pestanas',desc:'Soporte para multiples conversaciones simultaneas'}
+  ]},
+  {cat:'Exportar', items:[
+    {name:'Exportar TXT',desc:'Guarda el chat como archivo de texto plano'},
+    {name:'Exportar JSON',desc:'Exporta el chat en formato JSON estructurado'},
+    {name:'Exportar Markdown',desc:'Guarda el chat con formato Markdown'},
+    {name:'Copiar chat completo',desc:'Copia toda la conversacion al portapapeles'},
+    {name:'Imprimir chat',desc:'Envia el chat a impresion con formato limpio'},
+    {name:'Respaldo automatico',desc:'Backup del chat en localStorage permanente'},
+    {name:'Exportar con metadatos',desc:'Incluye modelo, modo y fecha en la exportacion'},
+    {name:'Limpiar chat',desc:'Borra el historial y empieza de cero'}
+  ]},
+  {cat:'Personalizar', items:[
+    {name:'Tema oscuro',desc:'Interfaz oscura profesional predeterminada'},
+    {name:'Tema claro',desc:'Activa el tema claro para trabajar de dia'},
+    {name:'Color de acento',desc:'Personaliza el color principal de la interfaz'},
+    {name:'Tamano de fuente',desc:'Ajusta el tamano del texto en toda la interfaz'},
+    {name:'Estilo de burbuja',desc:'Elige entre burbujas separadas o flujo continuo'},
+    {name:'Modo compacto',desc:'Reduce los espacios para ver mas contenido'},
+    {name:'CSS personalizado',desc:'Inyecta tus propios estilos CSS'},
+    {name:'Idioma de interfaz',desc:'Cambia el idioma de la interfaz de usuario'}
+  ]},
+  {cat:'Herramientas', items:[
+    {name:'Probador de regex',desc:'Prueba y depura expresiones regulares en vivo'},
+    {name:'Formatear JSON',desc:'Formatea y valida codigo JSON'},
+    {name:'Base64 encode/decode',desc:'Codifica y decodifica texto a Base64'},
+    {name:'Conversor de colores',desc:'Convierte entre HEX, RGB, HSL y nombres'},
+    {name:'Contador de palabras',desc:'Cuenta palabras, caracteres y lineas del texto'},
+    {name:'Conversor timestamp',desc:'Convierte timestamps Unix a fecha legible'},
+    {name:'Generar codigo QR',desc:'Genera codigos QR a partir de texto o URLs'},
+    {name:'Generar contrasena',desc:'Crea contrasenas seguras aleatorias'},
+    {name:'Acortar URL',desc:'Acorta enlaces largos para compartir'},
+    {name:'Calculadora',desc:'Calculadora integrada para operaciones rapidas'}
+  ]},
+  {cat:'Avanzado', items:[
+    {name:'Cadena de pensamiento',desc:'Visualiza el razonamiento paso a paso del modelo'},
+    {name:'Comparar modelos',desc:'Prueba el mismo prompt en 2 modelos distintos'},
+    {name:'Uso de tokens',desc:'Monitorea cuantos tokens consume cada mensaje'},
+    {name:'Estadisticas de API',desc:'Metricas de uso: solicitudes, latencia, errores'},
+    {name:'Procesar en lote',desc:'Envia multiples consultas a la vez'},
+    {name:'Auto-completar codigo',desc:'Sugerencias inteligentes mientras escribes codigo'},
+    {name:'Historial inteligente',desc:'El historial se resume automaticamente si es largo'},
+    {name:'Deshacer envio',desc:'Deshace el ultimo mensaje enviado (3s)'},
+    {name:'Pantalla activa',desc:'Evita que la pantalla se apague durante generacion'},
+    {name:'Restaurar sesion',desc:'Recupera toda la conversacion al recargar la pagina'}
+  ]},
+  {cat:'Soporte', items:[
+    {name:'Tutorial interactivo',desc:'Guia paso a paso para conocer todas las funciones'},
+    {name:'Guia de atajos',desc:'Todos los atajos de teclado documentados'},
+    {name:'FAQ',desc:'Preguntas frecuentes y solucion de problemas'},
+    {name:'Enviar feedback',desc:'Reporta bugs o sugiere mejoras directamente'},
+    {name:'Comunidad Discord',desc:'Unete al servidor de Discord de MemeCraft'},
+    {name:'GitHub',desc:'Codigo abierto en GitHub, contribuciones bienvenidas'},
+    {name:'Compartir app',desc:'Comparte MemeCraft Code con otros desarrolladores'},
+    {name:'Calificar',desc:'Deja tu valoracion y ayuda a mejorar'},
+    {name:'Comunidad',desc:'Conecta con otros usuarios y comparte tips'},
+    {name:'Novedades',desc:'Enterate de las ultimas actualizaciones y mejoras'}
+  ]},
+  {cat:'Sistema', items:[
+    {name:'Health check',desc:'Endpoint /api/health para monitoreo del servidor'},
+    {name:'Barra de estado',desc:'Indicador visual de conexion y estado del servidor'},
+    {name:'Info del servidor',desc:'Informacion tecnica: uptime, version, puerto'},
+    {name:'Tiempo activo',desc:'Muestra cuanto tiempo lleva funcionando el servidor'}
+  ]}
+];
+
+function abrirFunciones(){
+  document.getElementById('modalFunciones').classList.add('open');
+  if(!document.getElementById('funcBody').children.length) renderFunciones();
+  setTimeout(()=>document.getElementById('funcSearch').focus(),100);
+  document.getElementById('funcSearch').value='';
+  document.querySelectorAll('.modal-cat-body').forEach(b=>b.classList.add('open'));
+  const arrows=document.querySelectorAll('.modal-cat-header .arrow');
+  if(arrows.length) arrows.forEach(a=>a.classList.add('open'));
+}
+
+function cerrarFunciones(){
+  document.getElementById('modalFunciones').classList.remove('open');
+}
+
+function renderFunciones(){
+  const body=document.getElementById('funcBody');
+  let total=0;
+  FUNCIONES.forEach(({cat,items})=>{
+    total+=items.length;
+    let html=`<div class="modal-cat"><div class="modal-cat-header" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.arrow').classList.toggle('open')">${cat} <span class="arrow open">▶</span></div><div class="modal-cat-body open">`;
+    items.forEach(({name,desc,tag})=>{
+      const t=tag?`<span class="func-tag func-tag-${tag}">${tag}</span>`:'';
+      html+=`<div class="func-item"><span class="func-name">${name}</span><span class="func-desc">${desc}</span>${t}</div>`;
+    });
+    html+=`</div></div>`;
+    body.innerHTML+=html;
+  });
+  const count=document.createElement('div');
+  count.className='func-count';
+  count.textContent=`${total} funciones en 11 categorías`;
+  body.prepend(count);
+}
+
+function filtrarFunciones(v){
+  const q=v.toLowerCase().trim();
+  document.querySelectorAll('.func-item').forEach(item=>{
+    const t=item.textContent.toLowerCase();
+    const match=!q||t.includes(q);
+    item.style.display=match?'':'none';
+  });
+  document.querySelectorAll('.modal-cat').forEach(cat=>{
+    const visible=[...cat.querySelectorAll('.func-item')].some(i=>i.style.display!=='none');
+    cat.style.display=visible||!q?'':'none';
+    if(q&&visible){cat.querySelector('.modal-cat-body').classList.add('open');cat.querySelector('.arrow').classList.add('open')}
+  });
+  const visible=document.querySelectorAll('.func-item:not([style*="display: none"])').length;
+  const total=document.querySelectorAll('.func-item').length;
+  const count=document.querySelector('.func-count');
+  if(count) count.textContent=q?`${visible} de ${total} funciones coinciden`:`${total} funciones en 11 categorías`;
+}
+
+// ===== RESTORE STATE ON LOAD =====
+(function(){
+  if(modeloActual){
+    const card=document.querySelector(`.model-card[data-model="${modeloActual}"]`);
+    if(card){document.querySelectorAll('.model-card').forEach(c=>c.classList.remove('active'));card.classList.add('active')}
+    document.getElementById('modelBadge').textContent=NOMBRES_MODELO[modeloActual]||modeloActual;
+  }
+  if(modoActual){
+    const btn=document.querySelector(`.mode-btn[data-mode="${modoActual}"]`);
+    if(btn){document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+  }
+  if(sidebarCollapsed) document.getElementById('sidebar').classList.add('collapsed');
+  if(profundidadActual){
+    const dbtn=document.querySelector(`[data-depth="${profundidadActual}"]`);
+    if(dbtn){document.querySelectorAll('[data-depth]').forEach(b=>b.classList.remove('active'));dbtn.classList.add('active')}
+  }
+  if(localStorage.getItem('memecraft_theme')==='light'){temaOscuro=false;document.documentElement.classList.add('light');document.getElementById('temaLabel').textContent='Tema oscuro'}
+})();
+
+// Reset title when page is visible
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)document.title=notifTitulo});
+</script>
+
+<!-- FUNCIONES MODAL -->
+<div class="modal-overlay" id="modalFunciones" onclick="if(event.target===this)cerrarFunciones()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>100 Funciones de MemeCraft Code</h2>
+      <button class="modal-close" onclick="cerrarFunciones()">&times;</button>
+    </div>
+    <div class="modal-search">
+      <input type="text" id="funcSearch" placeholder="Buscar funciones..." oninput="filtrarFunciones(this.value)">
+    </div>
+    <div class="modal-body" id="funcBody"></div>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="modalApiKey" onclick="if(event.target===this)cerrarApiKey()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h2>API Key personalizada</h2>
+      <button class="modal-close" onclick="cerrarApiKey()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">
+        Si las claves integradas se agotan, pega tu propia API key de NVIDIA.
+        Se guarda en tu navegador y nunca se envia a ningun otro servidor.
+      </p>
+      <input type="password" id="customApiKey" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px" placeholder="nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="guardarApiKey()" style="flex:1;padding:7px 12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;font-size:12px">Guardar</button>
+        <button onclick="limpiarApiKey()" style="padding:7px 12px;background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:12px">Limpiar</button>
+      </div>
+      <div id="customApiKeyStatus" style="font-size:11px;color:var(--green);margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SHORTCUTS MODAL -->
+<div class="modal-overlay" id="modalShortcuts" onclick="if(event.target===this)cerrarShortcuts()">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h2>Atajos de Teclado</h2>
+      <button class="modal-close" onclick="cerrarShortcuts()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="shortcuts-grid">
+        <div class="shortcut-item"><span class="shortcut-key">Enter</span><span class="shortcut-desc">Enviar mensaje</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+Enter</span><span class="shortcut-desc">Enviar mensaje</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+L</span><span class="shortcut-desc">Limpiar chat</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+E</span><span class="shortcut-desc">Exportar TXT</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+J</span><span class="shortcut-desc">Exportar JSON</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+F</span><span class="shortcut-desc">Buscar en chat</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+Z</span><span class="shortcut-desc">Deshacer ultimo envio</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+1</span><span class="shortcut-desc">DeepSeek V4 Flash</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+2</span><span class="shortcut-desc">DeepSeek V4 Pro</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+3</span><span class="shortcut-desc">Qwen 3.5 397B</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+4</span><span class="shortcut-desc">Nemotron 3 Super</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+5</span><span class="shortcut-desc">Google Gemma 3</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Ctrl+6</span><span class="shortcut-desc">Meta Llama 4 Maverick</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">Escape</span><span class="shortcut-desc">Detener / Cerrar visor</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">Mostrar estos atajos</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+node_modules/
+dist-installer/
+dist-bundle/
+dist-pkg/
+desktop-net/dist/
+desktop-net/bin/
+desktop-net/obj/
+desktop-net/*.user
+*.log
+.DS_Store
